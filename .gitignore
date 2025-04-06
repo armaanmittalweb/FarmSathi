@@ -1,0 +1,39 @@
+# Global
+node_modules/
+.env
+*.log
+_pycache_/
+*.pyc
+.DS_Store
+
+# VSCode / IDE
+.vscode/
+.idea/
+
+# Docker
+*.pid
+*.db
+*.sock
+
+# OS
+Thumbs.db
+
+# Frontend (React)
+frontend/node_modules/
+frontend/build/
+
+# Backend (Node.js)
+backend/node_modules/
+backend/dist/
+
+# AI Models (Python)
+ai-models/_pycache_/
+ai-models/*.pyc
+ai-models/venv/
+ai-models/.ipynb_checkpoints/
+
+# Jupyter Notebook outputs
+**/.ipynb_checkpoints/
+*/.ipynb~
+*/.checkpoint.ipynb
+
