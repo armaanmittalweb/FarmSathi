@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Sun, Cloud, MessageSquare, CreditCard, HelpCircle, Menu, X, ChevronDown, Mic } from 'lucide-react';
+import farmSaathiImg from './assets/FarmSaathi.png';
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -148,7 +149,7 @@ export default function LandingPage() {
               {/* Logo */}
               <div className="flex-shrink-0 flex items-center">
                 <div className="h-12 w-12 bg-white rounded-full flex items-center justify-center">
-                  <img src="/api/placeholder/48/48" alt="FarmSaathi Logo" className="h-10 w-10" />
+                  <img src={farmSaathiImg} alt="FarmSaathi Logo" className="w-11 h-11 rounded-full object-cover" />
                 </div>
                 <span className="ml-2 text-xl font-bold">FarmSaathi</span>
               </div>
@@ -289,7 +290,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="mt-10 lg:mt-0 lg:w-1/2 flex justify-center">
-              <img src="/api/placeholder/400/320" alt="Farmer using FarmSaathi" className="rounded-lg shadow-xl" />
+              <img src={farmSaathiImg} alt="Farmer using FarmSaathi" className="rounded-lg shadow-xl" />
             </div>
           </div>
         </div>
