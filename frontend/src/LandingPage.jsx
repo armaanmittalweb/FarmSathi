@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Sun, Cloud, MessageSquare, CreditCard, HelpCircle, Menu, X, ChevronDown, Mic } from 'lucide-react';
 import farmSaathiImg from './assets/FarmSaathi.png';
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [language, setLanguage] = useState('english');
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const langDropdownRef = useRef(null);
 
   // Color scheme based on the logo
   const colors = {
@@ -139,6 +141,32 @@ export default function LandingPage() {
 
   const content = translations[language];
 
+  // Function to toggle the language dropdown
+  const toggleLangDropdown = () => {
+    setLangDropdownOpen(!langDropdownOpen);
+  };
+
+  // Function to handle language selection
+  const handleLanguageChange = (newLanguage) => {
+    setLanguage(newLanguage);
+    setLangDropdownOpen(false); // Close the dropdown after selection
+  };
+
+  // Click outside handler for language dropdown
+  const handleClickOutside = (e) => {
+    if (langDropdownRef.current && !langDropdownRef.current.contains(e.target)) {
+      setLangDropdownOpen(false);
+    }
+  };
+
+  // Add a click event listener to close the dropdown when clicking outside
+  React.useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [langDropdownOpen]);
+
   return (
     <div className="min-h-screen font-sans">
       {/* Navigation */}
@@ -170,38 +198,40 @@ export default function LandingPage() {
             
             {/* Language Selector */}
             <div className="hidden md:flex items-center">
-              <div className="relative inline-block text-left mr-4">
+              <div className="relative inline-block text-left mr-4" ref={langDropdownRef}>
                 <div>
                   <button 
                     type="button" 
                     className="inline-flex justify-center w-full rounded-md border border-white px-4 py-2 bg-green-700 text-sm font-medium shadow-sm hover:bg-green-600 focus:outline-none"
-                    onClick={() => {}}
+                    onClick={toggleLangDropdown}
                   >
                     {language.charAt(0).toUpperCase() + language.slice(1)}
                     <ChevronDown className="ml-2 h-5 w-5" aria-hidden="true" />
                   </button>
-                  <div className="absolute right-0 z-10 mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                    <div className="py-1" role="menu">
-                      <button 
-                        className={`${language === 'english' ? 'bg-gray-100' : ''} block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100`}
-                        onClick={() => setLanguage('english')}
-                      >
-                        English
-                      </button>
-                      <button 
-                        className={`${language === 'hindi' ? 'bg-gray-100' : ''} block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100`}
-                        onClick={() => setLanguage('hindi')}
-                      >
-                        हिंदी
-                      </button>
-                      <button 
-                        className={`${language === 'punjabi' ? 'bg-gray-100' : ''} block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100`}
-                        onClick={() => setLanguage('punjabi')}
-                      >
-                        ਪੰਜਾਬੀ
-                      </button>
+                  {langDropdownOpen && (
+                    <div className="absolute right-0 z-10 mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                      <div className="py-1" role="menu">
+                        <button 
+                          className={`${language === 'english' ? 'bg-gray-100' : ''} block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100`}
+                          onClick={() => handleLanguageChange('english')}
+                        >
+                          English
+                        </button>
+                        <button 
+                          className={`${language === 'hindi' ? 'bg-gray-100' : ''} block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100`}
+                          onClick={() => handleLanguageChange('hindi')}
+                        >
+                          हिंदी
+                        </button>
+                        <button 
+                          className={`${language === 'punjabi' ? 'bg-gray-100' : ''} block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100`}
+                          onClick={() => handleLanguageChange('punjabi')}
+                        >
+                          ਪੰਜਾਬੀ
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
               
@@ -241,19 +271,19 @@ export default function LandingPage() {
                   <div className="flex space-x-2">
                     <button 
                       className={`px-2 py-1 text-xs rounded ${language === 'english' ? 'bg-white text-green-800' : 'bg-green-700'}`}
-                      onClick={() => setLanguage('english')}
+                      onClick={() => handleLanguageChange('english')}
                     >
                       EN
                     </button>
                     <button 
                       className={`px-2 py-1 text-xs rounded ${language === 'hindi' ? 'bg-white text-green-800' : 'bg-green-700'}`}
-                      onClick={() => setLanguage('hindi')}
+                      onClick={() => handleLanguageChange('hindi')}
                     >
                       HI
                     </button>
                     <button 
                       className={`px-2 py-1 text-xs rounded ${language === 'punjabi' ? 'bg-white text-green-800' : 'bg-green-700'}`}
-                      onClick={() => setLanguage('punjabi')}
+                      onClick={() => handleLanguageChange('punjabi')}
                     >
                       PA
                     </button>
