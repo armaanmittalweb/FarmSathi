@@ -1,5 +1,8 @@
 const express = require("express");
+const multer = require("multer");
 const cors = require("cors");
+const { spawn } = require("child_process");
+const path = require("path");  // 
 const chatRoutes = require("./routes/chat");
 const authRoutes = require("./routes/auth");
 

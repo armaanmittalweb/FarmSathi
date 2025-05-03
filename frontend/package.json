@@ -1,5 +1,5 @@
 {
-  "name": "y",
+  "name": "frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,26 +10,21 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "framer-motion": "^12.6.2",
-    "lucide-react": "^0.475.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-icons": "^5.5.0",
-    "recharts": "^2.15.1"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.19.0",
-    "@types/react": "^19.0.8",
-    "@types/react-dom": "^19.0.3",
+    "@eslint/js": "^9.22.0",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
-    "autoprefixer": "^10.4.20",
-    "eslint": "^9.19.0",
-    "eslint-plugin-react": "^7.37.4",
-    "eslint-plugin-react-hooks": "^5.0.0",
-    "eslint-plugin-react-refresh": "^0.4.18",
-    "globals": "^15.14.0",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.22.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
     "postcss": "^8.5.3",
-    "tailwindcss": "^3.4.17",
-    "vite": "^6.3.2"
+    "tailwindcss": "^4.1.5",
+    "vite": "^6.3.1"
   }
 }
