@@ -1,36 +1,51 @@
-const { spawn } = require("child_process");
+const fs = require("fs");
 const path = require("path");
+const { spawn } = require("child_process");
+
+const farmerDataPath = path.join(__dirname, "../data/farmers.json");
+
+const loadFarmers = () => {
+  if (!fs.existsSync(farmerDataPath)) return [];
+  return JSON.parse(fs.readFileSync(farmerDataPath, "utf-8"));
+};
 
 exports.handleChat = (req, res) => {
-  const { chatbot_type, language, input_type, message } = req.body;
+  const isAudio = req.file !== undefined;
+  const input = isAudio ? req.file.path : req.body.message;
+  const language = req.body.language || "en";
+  const farmer_id = req.body.farmer_id;
 
-  let pythonScript = "python-scripts/main_pipeline.py";
-  let args = [chatbot_type, language];
-
-  if (input_type === "text") {
-    args.push("--text", message);
-  } else if (req.file) {
-    const audioPath = path.join(__dirname, "..", req.file.path);
-    args.push("--audio", audioPath);
-  } else {
-    return res.status(400).json({ error: "Invalid input" });
+  let farmer_profile = null;
+  if (farmer_id) {
+    const farmers = loadFarmers();
+    farmer_profile = farmers.find((f) => f.id === farmer_id);
   }
 
-  const process = spawn("python3", [pythonScript, ...args]);
+  const args = [
+    isAudio ? "--audio" : "--text",
+    input,
+    "--lang",
+    language,
+    "--profile",
+    JSON.stringify(farmer_profile || {})
+  ];
 
-  let result = "";
-  process.stdout.on("data", data => {
-    result += data.toString();
+  const python = spawn("python3", ["./python-scripts/chatbot.py", ...args]);
+
+  let response = "";
+  python.stdout.on("data", (data) => {
+    response += data.toString();
   });
 
-  process.stderr.on("data", err => {
-    console.error("Python error:", err.toString());
-  });
-
-  process.on("close", code => {
-    if (code !== 0) {
-      return res.status(500).json({ error: "Python script failed" });
+  python.on("close", (code) => {
+    if (code === 0) {
+      const [reply, audioFile] = response.split("||"); // Custom delimiter for audio
+      res.json({
+        reply: reply.trim(),
+        audio_url: audioFile?.trim() || null,
+      });
+    } else {
+      res.status(500).json({ error: "Chatbot failed to respond." });
     }
-    res.json({ reply: result.trim() });
   });
 };
