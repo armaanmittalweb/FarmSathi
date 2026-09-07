@@ -1,11 +1,6 @@
-import chromadb
-from chromadb.config import Settings
-
-chroma_client = chromadb.Client(Settings(
-    persist_directory="./chroma_db",  # Save to disk
-    anonymized_telemetry=False
-))
-
-# Create or get collection
-collection = chroma_client.get_or_create_collection(name="farmer_profiles")
-print("ChromaDB collection ready.")
+# DEPRECATED — kept only for git history.
+#
+# ChromaDB initialization now happens inside ai-service/rag.py using the
+# current `chromadb.PersistentClient(path=...)` API (the old
+# `chromadb.Client(Settings(persist_directory=...))` call in this file
+# no longer works on modern chromadb releases).

@@ -1,77 +1,49 @@
+require("dotenv").config();
+
 const express = require("express");
-const multer = require("multer");
 const cors = require("cors");
-const { spawn } = require("child_process");
-const path = require("path");  // 
-const chatRoutes = require("./routes/chat");
+const path = require("path");
+const fs = require("fs");
+
+const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
+const chatRoutes = require("./routes/chat");
+const weatherRoutes = require("./routes/weather");
+const schemesRoutes = require("./routes/schemes");
+const analysisRoutes = require("./routes/analysis");
 
 const app = express();
-app.use("/api", authRoutes); // Register auth routes under /api
-app.use(cors());
+
+const corsOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173").split(",");
+app.use(cors({ origin: corsOrigins }));
 app.use(express.json());
+
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+app.use("/uploads", express.static(uploadsDir));
+
+app.use("/api", authRoutes);
+app.use("/api/weather", weatherRoutes);
+app.use("/api/schemes", schemesRoutes);
 app.use("/chat", chatRoutes);
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// analysisRoutes mounts both /analyze-soil and /analyze-plant at the root,
+// matching the paths the original server.js exposed.
+app.use("/", analysisRoutes);
 
-// Setup storage for soil and plant images
-const soilStorage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/soil"),
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
-});
-const plantStorage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/plant"),
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
-});
+app.get("/health", (req, res) => res.json({ status: "ok" }));
 
-const uploadSoil = multer({ storage: soilStorage });
-const uploadPlant = multer({ storage: plantStorage });
+const PORT = process.env.PORT || 5000;
 
-/**
- * POST /analyze-soil
- * Receives: Soil Health Card Image
- * Returns: Suitable crops
- */
-app.post("/analyze-soil", uploadSoil.single("soilImage"), (req, res) => {
-  const filePath = req.file.path;
+async function start() {
+  await connectDB();
+  app.listen(PORT, () => console.log(`FarmSaathi backend running on port ${PORT}`));
+}
 
-  const py = spawn("python3", ["python-scripts/analyze_soil.py", filePath]);
+// Only connect to Mongo and start listening when this file is run directly
+// (`node server.js` / `npm start`) — not when it's `require()`d by tests,
+// which want the bare `app` to mount their own test database.
+if (require.main === module) {
+  start();
+}
 
-  let result = "";
-  py.stdout.on("data", (data) => {
-    result += data.toString();
-  });
-
-  py.stderr.on("data", (data) => {
-    console.error("Python error:", data.toString());
-  });
-
-  py.on("close", (code) => {
-    res.json({ crops: result.trim() });
-  });
-});
-
-/**
- * POST /analyze-plant
- * Receives: Plant/Crop Image
- * Returns: Crop health status
- */
-app.post("/analyze-plant", uploadPlant.single("plantImage"), (req, res) => {
-  const filePath = req.file.path;
-
-  const py = spawn("python3", ["python-scripts/analyze_plant.py", filePath]);
-
-  let result = "";
-  py.stdout.on("data", (data) => {
-    result += data.toString();
-  });
-
-  py.stderr.on("data", (data) => {
-    console.error("Python error:", data.toString());
-  });
-
-  py.on("close", (code) => {
-    res.json({ health: result.trim() });
-  });
-});
-const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+module.exports = { app, start };

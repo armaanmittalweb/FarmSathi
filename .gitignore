@@ -2,7 +2,7 @@
 node_modules/
 .env
 *.log
-_pycache_/
+__pycache__/
 *.pyc
 .DS_Store
 
@@ -21,19 +21,39 @@ Thumbs.db
 # Frontend (React)
 frontend/node_modules/
 frontend/build/
+frontend/dist/
 
 # Backend (Node.js)
 backend/node_modules/
 backend/dist/
+backend/uploads/
+backend/.mongo-data/
 
 # AI Models (Python)
-ai-models/_pycache_/
+ai-models/__pycache__/
 ai-models/*.pyc
 ai-models/venv/
 ai-models/.ipynb_checkpoints/
+# checkpoint.keras is a redundant mid-training snapshot — the exported
+# Crop_Disease_Prediction_Model.h5 (committed) is what's actually served.
+ai-models/Crop_Disease_Prediction_Model/checkpoint.keras
+# NOTE: the training dataset (ai-models/data/, ai-models/plantvillage_repo/)
+# and both trained model artifacts (*.h5, *.joblib) are intentionally
+# committed to this repo (not gitignored) so a fresh clone needs no
+# separate download or training step — see the root README.
+
+# ai-service (Python inference service)
+ai-service/venv/
+ai-service/__pycache__/
+# Third-party pretrained model weights (LLM GGUF, embeddings, Whisper,
+# TTS, translation — several GB total) are deliberately NOT committed:
+# they're redistributed verbatim from Hugging Face/Meta/etc., auto-download
+# on first use via ai-service/README.md, and don't belong in git the way
+# this project's own dataset/trained models do.
+ai-service/models/
+ai-service/chroma_db/
 
 # Jupyter Notebook outputs
 **/.ipynb_checkpoints/
 */.ipynb~
 */.checkpoint.ipynb
-

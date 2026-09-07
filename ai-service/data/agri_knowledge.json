@@ -1,0 +1,34 @@
+[
+  {
+    "id": "irrigation-drip-basics",
+    "text": "Drip irrigation delivers water directly to the plant root zone through emitters, cutting water use by 30-60% compared to flood irrigation and reducing weed growth since the soil between rows stays dry. It works well for row crops like cotton, sugarcane, vegetables, and orchards. Government subsidies of up to 55% are available for small and marginal farmers under the PMKSY 'Per Drop More Crop' component."
+  },
+  {
+    "id": "fertilizer-npk-basics",
+    "text": "Nitrogen (N) promotes leafy green growth, Phosphorus (P) supports root development and flowering, and Potassium (K) improves overall plant health and disease resistance. A Soil Health Card test tells you the exact N-P-K levels and pH of your specific field, so you can avoid both under- and over-fertilizing, which wastes money and can harm soil health over time."
+  },
+  {
+    "id": "crop-rotation-basics",
+    "text": "Rotating crops (e.g. alternating a cereal like wheat or rice with a legume like chickpea or moong) breaks pest and disease cycles, and legumes naturally fix nitrogen in the soil, reducing the fertilizer needed for the next crop. A 3-4 year rotation plan generally gives the best long-term soil health and yield stability."
+  },
+  {
+    "id": "integrated-pest-management",
+    "text": "Integrated Pest Management (IPM) combines light pesticide use with natural methods: introducing natural predators, using pheromone traps to monitor and trap insects, removing infected plants promptly, and rotating crops. This reduces both pesticide costs and the risk of pests developing resistance."
+  },
+  {
+    "id": "monsoon-sowing-calendar",
+    "text": "Kharif (monsoon) crops like rice, cotton, maize, soybean, and groundnut are typically sown from June to July with the onset of the southwest monsoon and harvested September to October. Rabi (winter) crops like wheat, mustard, chickpea, and barley are sown October to December and harvested March to April, relying on residual soil moisture and irrigation."
+  },
+  {
+    "id": "soil-ph-basics",
+    "text": "Most crops grow best in a soil pH between 6.0 and 7.5. Acidic soils (pH below 6) can be corrected by adding agricultural lime; alkaline soils (pH above 8) can be improved with gypsum or organic matter like farmyard manure and compost. A Soil Health Card test reports your exact pH."
+  },
+  {
+    "id": "water-stress-signs",
+    "text": "Early signs of water stress in crops include leaf curling or wilting during the hottest part of the day that doesn't recover by evening, dull or grey-green leaf color, and slowed growth. Checking soil moisture 5-10 cm below the surface (it should feel moist, not dry or waterlogged) is a simple way to time the next irrigation."
+  },
+  {
+    "id": "organic-manure-basics",
+    "text": "Farmyard manure (FYM), vermicompost, and green manure crops (like dhaincha or sunhemp ploughed back into the soil) improve soil structure, water retention, and microbial activity over time, and reduce dependence on chemical fertilizer. A typical recommendation is 5-10 tonnes of well-rotted FYM per acre before sowing."
+  }
+]

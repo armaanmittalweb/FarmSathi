@@ -1,0 +1,63 @@
+version: "3.9"
+
+# One-command, fully self-hosted stack — no external accounts or API keys
+# required (Mongo runs locally, ai-service serves open-weight models it
+# downloads/caches on first use). See ROADMAP.md and each service's README.
+#
+# NOTE: the vision/crop-recommendation models must be trained first (see
+# ai-models/README.md) — mount or bake in the resulting files before
+# `analyze-plant` / `analyze-soil` will work; everything else works with
+# just `docker compose up`.
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+
+  ai-service:
+    build: ./ai-service
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    volumes:
+      - ai-service-models:/app/models
+      - ai-service-chroma:/app/chroma_db
+      - ./ai-models:/app/ai-models:ro
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - ai-service
+    environment:
+      MONGO_URI: mongodb://mongo:27017/farmsathi
+      AI_SERVICE_URL: http://ai-service:8001
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-long-random-string}
+      DEV_MODE: "true"
+      CORS_ORIGIN: http://localhost:5173
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    volumes:
+      - backend-uploads:/app/uploads
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://localhost:5000
+    ports:
+      - "5173:5173"
+
+volumes:
+  mongo-data:
+  ai-service-models:
+  ai-service-chroma:
+  backend-uploads:

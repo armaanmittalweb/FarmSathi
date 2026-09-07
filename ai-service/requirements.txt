@@ -1,0 +1,45 @@
+# Core service
+fastapi>=0.115
+uvicorn[standard]>=0.34
+python-multipart>=0.0.20
+pydantic>=2.9
+
+# LLM (local, GGUF, via llama.cpp bindings)
+llama-cpp-python>=0.3.5
+huggingface_hub>=0.27
+
+# Embeddings + vector store (RAG)
+sentence-transformers>=3.3
+chromadb>=0.5.23
+
+# Speech-to-text
+faster-whisper>=1.1.0
+
+# Text-to-speech + translation (transformers-based)
+transformers>=4.47
+torch>=2.5
+sentencepiece>=0.2.0
+soundfile>=0.12.1
+scipy>=1.14
+
+# Vision (crop disease classifier)
+tensorflow-cpu>=2.18
+pillow>=11.0
+
+# Tabular (soil / crop recommendation)
+scikit-learn>=1.6
+joblib>=1.4
+pandas>=2.2
+numpy<2
+
+# Optional: best-effort OCR for Soil Health Card photo uploads
+pytesseract>=0.3.13
+
+python-dotenv>=1.0.1
+
+# --- Install notes -----------------------------------------------------
+# torch: the line above pulls the default (often CUDA) build. On a CPU-only
+# machine, install it explicitly first for a much smaller download:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+# pytesseract also needs the Tesseract OCR binary installed separately
+# (apt install tesseract-ocr / choco install tesseract / brew install tesseract).
