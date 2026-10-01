@@ -141,6 +141,17 @@ describe('sign-up, sign-in, sign-out', () => {
     expect(wrong.cookie).toBeUndefined()
   })
 
+  it('can lower the PBKDF2 rounds for new hashes while old hashes keep working', async () => {
+    const s = setup()
+    const old = await s.signup('9876543210', 'khet-ki-mitti')
+    s.env.PASSWORD_ITERATIONS = '20000'
+    await s.signup('9123456789', 'naya-password')
+    const hashes = (s.sql.db.prepare('SELECT pass_hash FROM users ORDER BY created_at, login').all() as { pass_hash: string }[]).map(r => r.pass_hash.split('$')[1])
+    expect(hashes.sort()).toEqual(['100000', '20000'])
+    expect((await s.call('POST', '/api/auth/login', { body: { login: old.login, password: 'khet-ki-mitti' } })).status).toBe(200)
+    expect((await s.call('POST', '/api/auth/login', { body: { login: '9123456789', password: 'naya-password' } })).status).toBe(200)
+  })
+
   it('rate-limits sign-ins with the LOGIN_LIMITER binding', async () => {
     let n = 0
     const s = setup({ LOGIN_LIMITER: { limit: async () => ({ success: ++n <= 5 }) } })

@@ -10,7 +10,7 @@ import {
   type App, type AppEnv, type Ctx, type Deps,
 } from './http'
 import { isLang } from './i18n'
-import { DUMMY_HASH, hashPassword, sha256hex, verifyPassword } from './keys'
+import { dummyHash, hashPassword, iterationsOf, sha256hex, verifyPassword } from './keys'
 
 export const CHATS_PAGE = 50
 export const MAX_IMPORT = 200
@@ -128,7 +128,7 @@ export function accountRoutes(app: App, deps: Deps, requireUser: MiddlewareHandl
     const id = crypto.randomUUID(), t = now(), sql = sqlOf(c)
     try {
       await sql.run('INSERT INTO users (id, login, pass_hash, created_at, name, lang) VALUES (?, ?, ?, ?, ?, ?)',
-        id, login, await hashPassword(b.password), t, name, langOf(c))
+        id, login, await hashPassword(b.password, iterationsOf(c.env.PASSWORD_ITERATIONS)), t, name, langOf(c))
     } catch (e) {
       if (/UNIQUE/i.test(String(e))) return fail(c, 409, 'conflict', 'login_taken')
       throw e
@@ -145,7 +145,7 @@ export function accountRoutes(app: App, deps: Deps, requireUser: MiddlewareHandl
     const password = typeof b?.password === 'string' && b.password.length <= 200 ? b.password : ''
     const user = login ? await userBy(c, 'login', login) : null
     // Unknown logins still pay for one hash, so timing does not tell them apart.
-    const ok = await verifyPassword(password, user?.pass_hash ?? DUMMY_HASH)
+    const ok = await verifyPassword(password, user?.pass_hash ?? dummyHash(iterationsOf(c.env.PASSWORD_ITERATIONS)))
     if (!user || !ok) return fail(c, 401, 'unauthenticated', 'bad_credentials')
     await startSession(c, sqlOf(c), user.id, now())
     return c.json(meOf(user))

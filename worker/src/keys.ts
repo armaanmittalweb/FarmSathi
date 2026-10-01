@@ -3,7 +3,8 @@
  *
  * Passwords are hashed with PBKDF2-SHA256 at 100,000 rounds (the most Workers allows), as the
  * contract asks: unlike SafeSpace, the server receives the password itself, so the rounds are what
- * slows down guessing from a stolen table. One hash per sign-in or sign-up fits the CPU budget.
+ * slow down guessing from a stolen table. If sign-ins hit the free plan's CPU limit (error 1102),
+ * lower the PASSWORD_ITERATIONS var: each hash stores its own count, so old hashes keep working.
  *
  * Hash format: pbkdf2_sha256$<iterations>$<salt b64url>$<hash b64url>
  */
@@ -34,7 +35,14 @@ export async function hashPassword(password: string, iterations = PASSWORD_ITERA
 }
 
 /** A hash no password matches, for spending the same time on unknown logins as on known ones. */
-export const DUMMY_HASH = `pbkdf2_sha256$${PASSWORD_ITERATIONS}$AAAAAAAAAAAAAAAAAAAAAA$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`
+export const dummyHash = (iterations = PASSWORD_ITERATIONS) =>
+  `pbkdf2_sha256$${iterations}$AAAAAAAAAAAAAAAAAAAAAA$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`
+
+/** PASSWORD_ITERATIONS from the env when it is a whole number in 1,000-100,000, else 100,000. */
+export function iterationsOf(v: string | undefined) {
+  const n = Number(v)
+  return Number.isInteger(n) && n >= 1000 && n <= MAX_ITERATIONS ? n : PASSWORD_ITERATIONS
+}
 
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {
   const [scheme, iter, salt, hash] = stored.split('$')

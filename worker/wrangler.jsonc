@@ -28,7 +28,10 @@
     "GROQ_STT_DAILY_CAP": "1800",
     "WORKERS_AI_STT_DAILY_CAP": "300",
     // Lowest cosine similarity (bge-m3) for a passage to go into the prompt.
-    "RAG_MIN_SCORE": "0.4"
+    "RAG_MIN_SCORE": "0.4",
+    // PBKDF2 rounds for new password hashes (the contract's 100,000). Lower it (e.g. 20000) only if
+    // sign-ins fail with error 1102 (CPU limit); existing hashes keep their own count.
+    "PASSWORD_ITERATIONS": "100000"
   },
   // Secrets (wrangler secret put): INTERNAL_KEY, VOICE_KEY; optionally GROQ_API_KEY, GEMINI_API_KEY,
   // OPENROUTER_API_KEY. A missing provider key skips that step of the chain.

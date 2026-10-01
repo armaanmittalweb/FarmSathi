@@ -56,6 +56,8 @@ export interface Bindings {
   WORKERS_AI_DAILY_CAP?: string
   GROQ_STT_DAILY_CAP?: string
   WORKERS_AI_STT_DAILY_CAP?: string
+  /** PBKDF2 rounds for new password hashes (default and maximum 100,000). */
+  PASSWORD_ITERATIONS?: string
   /** Lowest cosine similarity for a passage to go into the prompt (default 0.4). */
   RAG_MIN_SCORE?: string
 }
