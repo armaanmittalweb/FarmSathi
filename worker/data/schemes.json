@@ -1,0 +1,80 @@
+[
+  {
+    "id": "pm-kisan",
+    "name": { "en": "PM-KISAN (Pradhan Mantri Kisan Samman Nidhi)", "hi": "पीएम-किसान सम्मान निधि", "pa": "ਪੀਐਮ-ਕਿਸਾਨ ਸਨਮਾਨ ਨਿਧੀ" },
+    "category": "income_support",
+    "summary": {
+      "en": "Direct income support of ₹6,000 per year (in three ₹2,000 installments) paid to eligible small and marginal farmer families holding cultivable land.",
+      "hi": "पात्र लघु एवं सीमांत किसान परिवारों को प्रति वर्ष ₹6,000 (तीन किस्तों में ₹2,000-₹2,000) की प्रत्यक्ष आय सहायता।",
+      "pa": "ਯੋਗ ਛੋਟੇ ਅਤੇ ਸੀਮਾਂਤ ਕਿਸਾਨ ਪਰਿਵਾਰਾਂ ਨੂੰ ਪ੍ਰਤੀ ਸਾਲ ₹6,000 (ਤਿੰਨ ਕਿਸ਼ਤਾਂ ਵਿੱਚ) ਦੀ ਸਿੱਧੀ ਆਮਦਨ ਸਹਾਇਤਾ।"
+    },
+    "eligibility": "Small and marginal farmer families with cultivable landholding, subject to exclusion criteria (income tax payers, institutional landholders, government employees, etc.).",
+    "how_to_apply": "Apply online at pmkisan.gov.in or through the local Common Service Centre (CSC) / Patwari / Agriculture Officer with land records and Aadhaar.",
+    "official_link": "https://pmkisan.gov.in"
+  },
+  {
+    "id": "pmfby",
+    "name": { "en": "Pradhan Mantri Fasal Bima Yojana (Crop Insurance)", "hi": "प्रधानमंत्री फसल बीमा योजना", "pa": "ਪ੍ਰਧਾਨ ਮੰਤਰੀ ਫ਼ਸਲ ਬੀਮਾ ਯੋਜਨਾ" },
+    "category": "insurance",
+    "summary": {
+      "en": "Low-premium crop insurance (as low as 1.5-2% of sum insured for food/oilseed crops) protecting farmers against yield loss from natural calamities, pests, and diseases.",
+      "hi": "प्राकृतिक आपदाओं, कीट व रोगों से उपज हानि पर किसानों को कम प्रीमियम (खाद्य/तिलहन फसलों के लिए बीमित राशि का 1.5-2%) पर फसल बीमा सुरक्षा।",
+      "pa": "ਕੁਦਰਤੀ ਆਫ਼ਤਾਂ, ਕੀੜਿਆਂ ਅਤੇ ਬਿਮਾਰੀਆਂ ਕਾਰਨ ਪੈਦਾਵਾਰ ਦੇ ਨੁਕਸਾਨ ਤੋਂ ਬਚਾਅ ਲਈ ਘੱਟ ਪ੍ਰੀਮੀਅਮ ਵਾਲਾ ਫ਼ਸਲ ਬੀਮਾ।"
+    },
+    "eligibility": "All farmers (loanee and non-loanee) growing notified crops in notified areas.",
+    "how_to_apply": "Apply via pmfby.gov.in, through a bank branch, CSC, or insurance company agent before the enrollment cutoff for the crop season.",
+    "official_link": "https://pmfby.gov.in"
+  },
+  {
+    "id": "kcc",
+    "name": { "en": "Kisan Credit Card (KCC)", "hi": "किसान क्रेडिट कार्ड", "pa": "ਕਿਸਾਨ ਕ੍ਰੈਡਿਟ ਕਾਰਡ" },
+    "category": "credit",
+    "summary": {
+      "en": "Short-term credit up to ₹3 lakh at a subsidized effective interest rate (as low as 4% with timely repayment) for crop production, post-harvest expenses, and allied activities.",
+      "hi": "फसल उत्पादन, फसल कटाई के बाद के खर्च व संबद्ध गतिविधियों हेतु ₹3 लाख तक की अल्पकालिक ऋण सुविधा, समय पर भुगतान पर ब्याज दर मात्र 4%।",
+      "pa": "ਫ਼ਸਲ ਉਤਪਾਦਨ ਅਤੇ ਸਬੰਧਤ ਗਤੀਵਿਧੀਆਂ ਲਈ ₹3 ਲੱਖ ਤੱਕ ਦਾ ਥੋੜ੍ਹੇ ਸਮੇਂ ਦਾ ਕਰਜ਼ਾ, ਸਮੇਂ ਸਿਰ ਭੁਗਤਾਨ 'ਤੇ ਸਿਰਫ਼ 4% ਵਿਆਜ।"
+    },
+    "eligibility": "All farmers — owner cultivators, tenant farmers, sharecroppers, and members of Self Help Groups (SHGs)/Joint Liability Groups (JLGs).",
+    "how_to_apply": "Apply at any nationalised/regional rural/cooperative bank branch, or online via the bank's KCC portal, with land and identity documents.",
+    "official_link": "https://www.myscheme.gov.in/schemes/kcc"
+  },
+  {
+    "id": "soil-health-card",
+    "name": { "en": "Soil Health Card Scheme", "hi": "मृदा स्वास्थ्य कार्ड योजना", "pa": "ਮਿੱਟੀ ਸਿਹਤ ਕਾਰਡ ਯੋਜਨਾ" },
+    "category": "advisory",
+    "summary": {
+      "en": "Free soil testing every 2 years giving nutrient status (N, P, K, pH, and micronutrients) and crop-wise fertilizer/nutrient recommendations for each farm.",
+      "hi": "हर 2 वर्ष में निःशुल्क मृदा परीक्षण जो प्रत्येक खेत के लिए पोषक तत्व स्थिति (N, P, K, pH) व फसलवार उर्वरक अनुशंसा देता है।",
+      "pa": "ਹਰ 2 ਸਾਲਾਂ ਬਾਅਦ ਮੁਫ਼ਤ ਮਿੱਟੀ ਟੈਸਟ, ਜੋ ਹਰੇਕ ਖੇਤ ਲਈ ਪੌਸ਼ਟਿਕ ਤੱਤ (N, P, K, pH) ਅਤੇ ਖਾਦ ਦੀ ਸਿਫ਼ਾਰਸ਼ ਦਿੰਦਾ ਹੈ।"
+    },
+    "eligibility": "All landholding farmers; samples collected by state agriculture department field staff.",
+    "how_to_apply": "Contact the local Agriculture Department office or Krishi Vigyan Kendra (KVK) to request a soil sample collection.",
+    "official_link": "https://soilhealth.dac.gov.in"
+  },
+  {
+    "id": "pmksy",
+    "name": { "en": "Pradhan Mantri Krishi Sinchayee Yojana (Irrigation)", "hi": "प्रधानमंत्री कृषि सिंचाई योजना", "pa": "ਪ੍ਰਧਾਨ ਮੰਤਰੀ ਕ੍ਰਿਸ਼ੀ ਸਿੰਚਾਈ ਯੋਜਨਾ" },
+    "category": "irrigation",
+    "summary": {
+      "en": "Subsidies (up to 55% for small/marginal farmers) for micro-irrigation systems (drip and sprinkler) under 'Per Drop More Crop' to improve water-use efficiency.",
+      "hi": "'पर ड्रॉप मोर क्रॉप' के तहत सूक्ष्म सिंचाई (ड्रिप व स्प्रिंकलर) पर सब्सिडी (लघु/सीमांत किसानों के लिए 55% तक) जल उपयोग दक्षता बढ़ाने हेतु।",
+      "pa": "ਪਾਣੀ ਦੀ ਵਰਤੋਂ ਦੀ ਕੁਸ਼ਲਤਾ ਵਧਾਉਣ ਲਈ ਡਰਿੱਪ ਅਤੇ ਸਪ੍ਰਿੰਕਲਰ ਸਿੰਚਾਈ 'ਤੇ ਸਬਸਿਡੀ (ਛੋਟੇ ਕਿਸਾਨਾਂ ਲਈ 55% ਤੱਕ)।"
+    },
+    "eligibility": "All farmers, with higher subsidy rates for small, marginal, SC/ST, and women farmers.",
+    "how_to_apply": "Apply through the state Horticulture/Agriculture Department portal or district office.",
+    "official_link": "https://pmksy.gov.in"
+  },
+  {
+    "id": "enam",
+    "name": { "en": "e-NAM (National Agriculture Market)", "hi": "ई-नाम (राष्ट्रीय कृषि बाजार)", "pa": "ਈ-ਨਾਮ (ਰਾਸ਼ਟਰੀ ਖੇਤੀ ਬਾਜ਼ਾਰ)" },
+    "category": "market_access",
+    "summary": {
+      "en": "A pan-India electronic trading platform connecting existing mandis, letting farmers get competitive, transparent price discovery for their produce from anywhere.",
+      "hi": "मौजूदा मंडियों को जोड़ने वाला अखिल भारतीय इलेक्ट्रॉनिक व्यापार मंच, जो किसानों को कहीं से भी अपनी उपज का प्रतिस्पर्धी व पारदर्शी मूल्य दिलाता है।",
+      "pa": "ਮੌਜੂਦਾ ਮੰਡੀਆਂ ਨੂੰ ਜੋੜਨ ਵਾਲਾ ਦੇਸ਼-ਵਿਆਪੀ ਇਲੈਕਟ੍ਰਾਨਿਕ ਵਪਾਰ ਮੰਚ, ਜੋ ਕਿਸਾਨਾਂ ਨੂੰ ਕਿਤੋਂ ਵੀ ਪਾਰਦਰਸ਼ੀ ਭਾਅ ਦਿਵਾਉਂਦਾ ਹੈ।"
+    },
+    "eligibility": "Farmers registered with a participating mandi (APMC) in an e-NAM-integrated state.",
+    "how_to_apply": "Register free at enam.gov.in or through the local mandi's e-NAM help desk.",
+    "official_link": "https://www.enam.gov.in"
+  }
+]
