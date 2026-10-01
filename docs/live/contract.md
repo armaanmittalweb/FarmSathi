@@ -87,6 +87,18 @@ Gaps in the first draft, filled with the simplest consistent choice. The app can
 - **Stats**: `today` counts requests that passed the visitor limit. `byProvider` is today's successful answers per provider: `groq`, `gemini`, `openrouter`, `workers-ai` (chat), `groq-stt`, `workers-ai-stt` (transcription) and `voice` (new clips from the Space); providers with none are absent. `lastStepToday` is the 1-based position, in that request's own chain order, of the step that answered the latest chat today (so Gemini answering Punjabi is 1), or 0 when there was none. `/internal/prune` returns `{ chats, sessions, counters }` (rows deleted).
 - **Voice Space**: spells numbers out before synthesis (the MMS vocabularies have almost no digits), so "₹6,000" is read as words in all three languages.
 
+## App details (decided while building `frontend/`)
+
+Gaps filled on the app side with the simplest consistent choice. Nothing here changes a route or a shape.
+
+- **Model files**: served gzipped with a content hash in the name (`/models/leaf.<hash>.onnx.gz`, `/models/crop.<hash>.onnx.gz`, `/models/ort.<hash>.wasm.gz` for onnxruntime-web's single-thread SIMD WASM), unpacked in the browser with `DecompressionStream`, and kept in the Cache API (`fs-models-v1`). Download sizes shown before the first fetch: leaf check 12.5 MB (runtime 3.7 + model 8.9), crop adviser 3.8 MB (runtime 3.7 + model 0.15); the runtime is shared. The raw `.onnx` files stay in `frontend/public/models/` as the conversion outputs but are not deployed.
+- **Chat requests**: `history` is the last 3 question/answer pairs of the visit (6 entries). A guest sends `profile` (the Worker reads only crops, state and farm size); a signed-in farmer sends none.
+- **Guest history**: kept in `localStorage` as `ChatTurn[]` (newest 200), with ids `g<base36 time><random>` that match the import pattern. After sign-in or sign-up the Me tab offers to import them; nothing is sent without that tap.
+- **Listen**: answers longer than the 600-character limit are split at sentence ends into pieces of at most 560 characters and spoken one after another. A 503 or 429 with `fallback: 'device'`, a network failure or an unplayable clip on the first piece switches to the phone's `speechSynthesis` voice for the language (`hi-IN`, `pa-IN`, `en-IN`); if the phone has none, the answer says so. The app shows which voice read the answer, and "Getting the voice ready…" while it waits (up to the Worker's 25 s).
+- **Schemes**: the Schemes tab and chat source chips use the app's own offline copy (`frontend/src/content/schemes.ts`: same six ids and categories, plus the amount, eligibility as a list, steps and documents in all three languages). The app does not call `GET /api/schemes`; it stays for other clients.
+- **Weather**: Open-Meteo forecast with `past_days=30`; one hour's cache per village in `localStorage` (`fs.wx:<lat>,<lon>`), shown with "No signal. Showing what was saved at …" when offline. The Soil tab prefills temperature and humidity from the coming week's hourly mean and rainfall from the last 30 days' total.
+- **Mock**: `vite --mode mock` (or `VITE_API=mock`) swaps the client for an in-memory API with canned answers in all three languages and a fake forecast; production builds do not contain it.
+
 ## Shapes
 
 ```ts
