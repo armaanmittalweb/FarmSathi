@@ -1,0 +1,101 @@
+# FarmSaathi live: the contract
+
+Two agents build against this file: **backend** (new `worker/` Hono Worker + D1, and `voice-space/` for Hugging Face) and **app** (`frontend/` rebuild, plus `frontend/src/models/` in-browser inference and `models-web/` conversion scripts).
+The approved plan: https://claude.ai/artifact/9Yg4X8tp59qDnbH4Yqm2eX (all six decisions taken as recommended).
+If something here is wrong or missing, change it in the same commit as the code and say so in the commit message.
+`worker/src/contract.ts` holds these shapes as TypeScript; `frontend/src/contract.ts` is a byte-identical copy.
+
+The existing `backend/` (Express + Mongo) and `ai-service/` (FastAPI, local models) stay untouched: they are the self-hosted `docker compose` path. The hosted path is `frontend/` + `worker/` + `voice-space/`.
+
+## Hosts
+
+- App: `https://farmsaathi.amittal.dev` (Vercel, root `frontend`). Local: `http://localhost:5176`.
+- API: `https://farmsaathi-api.amittal.dev` (Worker `farmsaathi-api`, D1 `farmsaathi`, Workers AI binding `AI`). Local: `http://localhost:8790`.
+- Voice: a Hugging Face Docker Space `armaanmittalweb/farmsaathi-voice`, called only by the Worker (`VOICE_URL` var, `VOICE_KEY` secret sent as `x-voice-key`).
+- Session: HttpOnly cookie `fs_session` on the API host, `Secure; HttpOnly; SameSite=Lax; Path=/; Max-Age=2592000`, stored as SHA-256. `credentials: 'include'`. CORS: exact origins `https://farmsaathi.amittal.dev`, `http://localhost:5176`, credentials on. State-changing requests need `Content-Type: application/json` (or `multipart/form-data` for audio) and an allowed Origin, otherwise 403.
+- Errors: `{ error: string, code: 'bad_request'|'unauthenticated'|'forbidden'|'not_found'|'conflict'|'rate_limited'|'too_large'|'unavailable'|'server', retryAfter?: number }`. `error` is written for the farmer and localised when the request carried `lang` (en, hi, pa).
+
+## Languages
+
+`Lang = 'en' | 'hi' | 'pa'`. Every route that returns text a farmer reads takes `lang` and answers in it. Hindi in Devanagari, Punjabi in Gurmukhi.
+
+## Accounts (optional)
+
+Everything works without an account. An account saves chats and the profile across phones.
+
+| Method, path | Body → response |
+|---|---|
+| POST /api/auth/signup | `{ login, password, name?, lang }` → 201 `Me`, sets cookie. `login` is a 10-digit Indian mobile number (optionally +91) or an email; normalised (`+91XXXXXXXXXX` or lower-cased email). Password ≥ 8 chars. 409 if taken. **No OTP, no SMS**: the number is only a username |
+| POST /api/auth/login | `{ login, password }` → `Me`, sets cookie. 401 generic, same timing for unknown logins |
+| POST /api/auth/logout | → 204 |
+| GET /api/auth/me | → `Me` or 401 |
+| PATCH /api/me | `Partial<Profile>` → `Me` |
+| DELETE /api/me | `{ password }` → 204, deletes everything |
+| GET /api/me/chats?before=<id> | → `{ chats: ChatTurn[], more: boolean }`, newest first, 50 per page |
+| POST /api/me/chats/import | `{ turns: ChatTurn[] }` (≤ 200) → 204: moves a guest's on-device history into the account at sign-in |
+
+Passwords: PBKDF2-SHA256, 100k iterations (Workers CPU allows it once per login). Login rate limit 5/min per IP.
+
+## Chat
+
+| Method, path | |
+|---|---|
+| POST /api/chat | `{ message, lang, profile?: Profile, history?: {role, text}[] (last 6 turns) }` → `ChatReply`. Signed in: the turn is saved and the stored profile is used. Message ≤ 1,000 chars |
+| POST /api/transcribe | multipart `audio` (webm/ogg/mp4/wav, ≤ 2 MB, ≤ 60 s) + `lang` → `{ text, lang }` |
+| POST /api/speak | `{ text (≤ 600 chars), lang }` → `audio/wav`, or 503 `unavailable` with `{ fallback: 'device' }` when the voice Space is asleep, busy or failing. Responses cached by SHA-256(lang+text) in the Cache API for 30 days |
+| POST /api/voice/wake | → 202. The app calls it when the Ask tab opens, so a sleeping Space is warm by the time an answer arrives |
+
+**Retrieval**: the 14 passages (6 schemes from `backend/data/schemes.json`, 8 notes from `ai-service/data/agri_knowledge.json`, copied into `worker/data/`) are embedded with Workers AI `@cf/baai/bge-m3` and stored in D1 the first time the Worker needs them (re-embedded when the data file's hash changes). A question is embedded the same way; the top 3 passages above a similarity floor go into the prompt. Scheme passages are also returned as `sources` so the app can link to the Schemes tab.
+
+**The chain** (each step skipped when its key is missing, its daily cap is reached, or it fails/times out at 12 s):
+1. Groq `llama-3.3-70b-versatile` (`GROQ_API_KEY`)
+2. Google Gemini `gemini-2.5-flash` (`GEMINI_API_KEY`), **first** when `lang === 'pa'`
+3. OpenRouter, a free model set by `OPENROUTER_MODEL` (`OPENROUTER_API_KEY`)
+4. Workers AI `@cf/meta/llama-3.1-8b-instruct` (no key)
+
+Model names are vars so they can be changed without a deploy. Only the question, language, history text, matched passages and the profile's crop/state/farm size are sent; never name, phone or email. The system prompt keeps the existing FarmSaathi voice (practical, concise, honest when unsure) and adds: answer in the requested script, never invent scheme amounts or dates that aren't in the passages, suggest the nearest KVK or agri officer for anything risky (pesticide doses, livestock illness).
+
+**Speech to text**: Groq `whisper-large-v3-turbo`, then Workers AI `@cf/openai/whisper-large-v3-turbo`.
+
+**Limits**: 30 chat messages, 30 transcriptions and 60 speak requests per visitor per day (keyed by IP hash + session), and a global daily cap per provider stored in D1 (`GROQ_DAILY_CAP` etc. vars). Over the limit → 429 `rate_limited` with a localised message and `retryAfter`.
+
+## Public data
+
+| Method, path | |
+|---|---|
+| GET /api/schemes?lang= | → `Scheme[]` (static, `Cache-Control: public, max-age=86400`) |
+| GET /api/test | health, no D1 |
+| GET /internal/stats, POST /internal/prune | `x-internal-key` = `INTERNAL_KEY`, else 404. Stats: `{ users, chats, dbBytes, today: { chat, transcribe, speak }, byProvider: Record<string, number>, lastStepToday: number }` |
+
+Weather is called from the browser straight to Open-Meteo (no key; cache an hour per village in localStorage). Leaf check and crop advice run in the browser (below); the Worker has no routes for them.
+
+## Shapes
+
+```ts
+export type Lang = 'en' | 'hi' | 'pa'
+export interface Profile { name: string | null; lang: Lang; state: string | null; district: string | null; lat: number | null; lon: number | null; crops: string[]; farmSizeAcres: number | null }
+export interface Me { user: { id: string; login: string; createdAt: string }; profile: Profile }
+export interface Source { id: string; kind: 'scheme' | 'note'; title: string }
+export interface ChatReply { text: string; lang: Lang; sources: Source[]; provider: 'groq' | 'gemini' | 'openrouter' | 'workers-ai'; turnId: string | null }
+export interface ChatTurn { id: string; at: string; lang: Lang; question: string; answer: string; sources: Source[] }
+export interface Scheme { id: string; category: string; name: string; summary: string; eligibility: string; howToApply: string; link: string | null }
+export interface ApiError { error: string; code: string; retryAfter?: number; fallback?: 'device' }
+```
+
+## In-browser models (app agent)
+
+- `models-web/convert_leaf.py`: `ai-models/Crop_Disease_Prediction_Model/Crop_Disease_Prediction_Model.h5` → `frontend/public/models/leaf.onnx` (tf2onnx, opset ≥ 13), with `class_names.json` copied beside it. Preprocessing must match `ai-service/vision.py` exactly (resize to `VISION_IMG_SIZE`, same scaling).
+- `models-web/convert_crop.py`: `ai-models/crop_recommendation_model.joblib` → `frontend/public/models/crop.onnx` (skl2onnx, including the pipeline's scaler), with the class list. Feature order `[n, p, k, temperature, humidity, ph, rainfall]`.
+- Parity (`models-web/parity.py` writes fixtures; a vitest test reads them): crop model top class identical on all 2,200 rows of `ai-models/data/Crop_recommendation.csv` and probabilities within 1e-4; leaf model top class identical on 300 images sampled across all 15 classes of `ai-models/plantvillage_repo/` and probabilities within 1e-3.
+- Run with `onnxruntime-web` (WASM, single thread so no COOP/COEP is needed), lazy-loaded only on the Leaf and Soil tabs, cached by the service worker. The app shows the download size before the first fetch.
+
+```ts
+export interface LeafResult { top: { label: string; crop: string; disease: string | null; p: number }[]; ms: number }   // top 3
+export interface CropResult { top: { crop: string; p: number }[]; ms: number }                                     // top 3
+```
+
+Labels map to localised crop and disease names and next-step advice in `frontend/src/content/diseases.ts` (15 classes × 3 languages; healthy classes say so). Advice is general and points to the local KVK for sprays and doses.
+
+## Data that never leaves the phone
+
+Leaf photos, soil values, location (only lat/lon to Open-Meteo), guest chat history (localStorage until the farmer signs in and chooses to import it).
