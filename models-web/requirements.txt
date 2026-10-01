@@ -1,0 +1,10 @@
+# The converters run on top of the ai-service environment (TensorFlow, scikit-learn, Pillow):
+#   py -3.10 -m venv models-web/.venv
+#   echo <path to ai-service/venv/Lib/site-packages> > models-web/.venv/Lib/site-packages/aiservice.pth
+#   models-web/.venv/Scripts/python -m pip install --no-deps -r models-web/requirements.txt
+# (--no-deps: tf2onnx and onnxconverter-common pin an old protobuf that TensorFlow 2.21 cannot use.)
+tf2onnx==1.17.0
+skl2onnx==1.20.0
+onnxconverter-common==1.16.0
+onnx==1.23.1
+onnxruntime==1.23.2
