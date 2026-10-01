@@ -1,0 +1,6 @@
+# torch comes from the CPU-only index in the Dockerfile (about 200 MB instead of 2.5 GB with CUDA).
+transformers==5.16.1
+fastapi==0.141.1
+uvicorn==0.52.4
+numpy==1.26.4
+scipy==1.15.3

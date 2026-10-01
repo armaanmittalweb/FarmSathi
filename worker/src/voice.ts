@@ -15,7 +15,7 @@ import { sha256hex } from './keys'
 export const MAX_AUDIO_BYTES = 2 * 1024 * 1024
 export const MAX_SPEAK_CHARS = 600
 export const SPEAK_CACHE_SECONDS = 30 * 86_400
-export const VOICE_TIMEOUT_MS = 15_000
+export const VOICE_TIMEOUT_MS = 25_000
 export const WAKE_TIMEOUT_MS = 25_000
 export const DEFAULT_STT_MODELS = { groq: 'whisper-large-v3-turbo', 'workers-ai': '@cf/openai/whisper-large-v3-turbo' }
 export const DEFAULT_STT_CAPS = { groq: 1800, 'workers-ai': 300 }

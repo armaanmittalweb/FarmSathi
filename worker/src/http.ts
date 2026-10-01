@@ -71,7 +71,7 @@ export interface Deps {
   cache?: () => SpeakCache | undefined
   /** Per chain step and per transcription provider (default 12 s). */
   stepTimeoutMs?: number
-  /** For the voice Space (default 15 s). */
+  /** For the voice Space (default 25 s: a 600-character answer takes a while on 2 free vCPUs). */
   voiceTimeoutMs?: number
 }
 
