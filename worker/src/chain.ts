@@ -23,7 +23,7 @@ export const DEFAULT_MODELS: Record<ProviderName, string> = {
   groq: 'llama-3.3-70b-versatile',
   gemini: 'gemini-2.5-flash',
   openrouter: 'meta-llama/llama-3.3-70b-instruct:free',
-  'workers-ai': '@cf/meta/llama-3.1-8b-instruct',
+  'workers-ai': '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
 }
 
 /** Calls per India day, a little under each free tier. Override with the *_DAILY_CAP vars. */

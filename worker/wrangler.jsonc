@@ -16,7 +16,7 @@
     "GROQ_MODEL": "llama-3.3-70b-versatile",
     "GEMINI_MODEL": "gemini-2.5-flash",
     "OPENROUTER_MODEL": "meta-llama/llama-3.3-70b-instruct:free",
-    "WORKERS_AI_MODEL": "@cf/meta/llama-3.1-8b-instruct",
+    "WORKERS_AI_MODEL": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
     "EMBED_MODEL": "@cf/baai/bge-m3",
     "GROQ_STT_MODEL": "whisper-large-v3-turbo",
     "WORKERS_AI_STT_MODEL": "@cf/openai/whisper-large-v3-turbo",
@@ -31,11 +31,11 @@
     "RAG_MIN_SCORE": "0.4",
     // PBKDF2 rounds for new password hashes (the contract's 100,000). Lower it (e.g. 20000) only if
     // sign-ins fail with error 1102 (CPU limit); existing hashes keep their own count.
-    "PASSWORD_ITERATIONS": "100000"
+    "PASSWORD_ITERATIONS": "20000"
   },
   // Secrets (wrangler secret put): INTERNAL_KEY, VOICE_KEY; optionally GROQ_API_KEY, GEMINI_API_KEY,
   // OPENROUTER_API_KEY. A missing provider key skips that step of the chain.
-  "d1_databases": [{ "binding": "DB", "database_name": "farmsaathi", "database_id": "00000000-0000-0000-0000-000000000000" }],
+  "d1_databases": [{ "binding": "DB", "database_name": "farmsaathi", "database_id": "12bc4c59-e99b-4ebf-986a-b976d6318463" }],
   "ai": { "binding": "AI" },
   "ratelimits": [
     // 5 sign-ins (and sign-ups and account deletions) per minute per IP.
