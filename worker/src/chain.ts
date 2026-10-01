@@ -5,7 +5,7 @@
  *   1. Groq (GROQ_MODEL, default llama-3.3-70b-versatile)
  *   2. Google Gemini (GEMINI_MODEL, default gemini-2.5-flash), moved first for Punjabi
  *   3. OpenRouter (OPENROUTER_MODEL, a free model)
- *   4. Workers AI (WORKERS_AI_MODEL, default @cf/meta/llama-3.1-8b-instruct), no key
+ *   4. Workers AI (WORKERS_AI_MODEL, default @cf/meta/llama-3.3-70b-instruct-fp8-fast), no key
  *
  * What reaches a provider: the system prompt, the question, up to 6 earlier turns' text, the
  * matched passages and the profile's crops, state and farm size. Never a name, number or email.

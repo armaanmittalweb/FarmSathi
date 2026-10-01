@@ -37,7 +37,7 @@ describe('the chain', () => {
     expect(res.json.text).toBe('Workers AI answer about your crop.')
     expect(f.calls.map(c => c.host)).toEqual([GROQ, GEMINI, OPENROUTER])
     const [call] = chatModelCalls(s.ai!)
-    expect(call.model).toBe('@cf/meta/llama-3.1-8b-instruct')
+    expect(call.model).toBe('@cf/meta/llama-3.3-70b-instruct-fp8-fast')
     expect((call.inputs.messages as any[])[0].content).toBe(systemPrompt('en'))
   })
 

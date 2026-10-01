@@ -58,7 +58,7 @@ from `ALLOWED_ORIGINS` and `Content-Type: application/json` (`multipart/form-dat
    1. Groq `llama-3.3-70b-versatile`
    2. Gemini `gemini-2.5-flash` (thinking off), **first for Punjabi**
    3. OpenRouter, a free model (`OPENROUTER_MODEL`)
-   4. Workers AI `@cf/meta/llama-3.1-8b-instruct` (no key)
+   4. Workers AI `@cf/meta/llama-3.3-70b-instruct-fp8-fast` (no key)
 
    Every step at its cap → 429; every step failing → 503. The system prompt keeps the FarmSaathi
    voice from `ai-service/llm.py` (practical, concise, honest when unsure) and adds: answer in the

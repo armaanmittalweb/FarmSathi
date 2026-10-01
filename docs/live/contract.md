@@ -51,7 +51,7 @@ Passwords: PBKDF2-SHA256, 100k iterations (Workers CPU allows it once per login)
 1. Groq `llama-3.3-70b-versatile` (`GROQ_API_KEY`)
 2. Google Gemini `gemini-2.5-flash` (`GEMINI_API_KEY`), **first** when `lang === 'pa'`
 3. OpenRouter, a free model set by `OPENROUTER_MODEL` (`OPENROUTER_API_KEY`)
-4. Workers AI `@cf/meta/llama-3.1-8b-instruct` (no key)
+4. Workers AI `@cf/meta/llama-3.3-70b-instruct-fp8-fast` (no key)
 
 Model names are vars so they can be changed without a deploy. Only the question, language, history text, matched passages and the profile's crop/state/farm size are sent; never name, phone or email. The system prompt keeps the existing FarmSaathi voice (practical, concise, honest when unsure) and adds: answer in the requested script, never invent scheme amounts or dates that aren't in the passages, suggest the nearest KVK or agri officer for anything risky (pesticide doses, livestock illness).
 
