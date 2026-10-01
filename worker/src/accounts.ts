@@ -115,9 +115,9 @@ export function accountRoutes(app: App, deps: Deps, requireUser: MiddlewareHandl
   const tooMany = (c: Ctx) => fail(c, 429, 'rate_limited', 'too_many_tries', { retryAfter: 60 })
 
   app.post('/api/auth/signup', async c => {
-    if (!(await hitLimiter(c.env.LOGIN_LIMITER, clientIp(c)))) return tooMany(c)
     const b = await readJson(c)
     setLang(c, b?.lang)
+    if (!(await hitLimiter(c.env.LOGIN_LIMITER, clientIp(c)))) return tooMany(c)
     if (!b) return fail(c, 400, 'bad_request', 'bad_request')
     const login = normLogin(b.login)
     if (!login) return fail(c, 400, 'bad_request', 'bad_login')
@@ -138,9 +138,9 @@ export function accountRoutes(app: App, deps: Deps, requireUser: MiddlewareHandl
   })
 
   app.post('/api/auth/login', async c => {
-    if (!(await hitLimiter(c.env.LOGIN_LIMITER, clientIp(c)))) return tooMany(c)
     const b = await readJson(c)
     setLang(c, b?.lang)
+    if (!(await hitLimiter(c.env.LOGIN_LIMITER, clientIp(c)))) return tooMany(c)
     const login = normLogin(b?.login)
     const password = typeof b?.password === 'string' && b.password.length <= 200 ? b.password : ''
     const user = login ? await userBy(c, 'login', login) : null
@@ -178,9 +178,9 @@ export function accountRoutes(app: App, deps: Deps, requireUser: MiddlewareHandl
   })
 
   app.delete('/api/me', requireUser, async c => {
-    if (!(await hitLimiter(c.env.LOGIN_LIMITER, clientIp(c)))) return tooMany(c)
     const b = await readJson(c)
     setLang(c, b?.lang)
+    if (!(await hitLimiter(c.env.LOGIN_LIMITER, clientIp(c)))) return tooMany(c)
     const user = await userBy(c, 'id', c.get('user')!.id)
     if (!user || typeof b?.password !== 'string' || !(await verifyPassword(b.password, user.pass_hash))) return fail(c, 403, 'forbidden', 'wrong_password')
     // Sessions and chats go with the user (ON DELETE CASCADE).
