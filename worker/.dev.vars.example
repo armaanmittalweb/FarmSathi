@@ -1,0 +1,11 @@
+# Copy to .dev.vars for `npm run dev` (wrangler dev --port 8790). Never commit .dev.vars.
+INTERNAL_KEY=local-internal-key
+# The voice Space: run voice-space/ locally (uvicorn app:app --port 7860) and point VOICE_URL at it
+# in .dev.vars, or leave VOICE_KEY unset and /api/speak answers 503 {fallback:'device'}.
+# VOICE_URL=http://localhost:7860
+# VOICE_KEY=local-voice-key
+# Optional: chain providers. Each missing key skips that step; Workers AI (step 4) needs none,
+# but in `wrangler dev` it calls your Cloudflare account (remote binding).
+# GROQ_API_KEY=
+# GEMINI_API_KEY=
+# OPENROUTER_API_KEY=

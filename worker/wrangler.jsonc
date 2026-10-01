@@ -1,0 +1,45 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "farmsaathi-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-25",
+  "observability": { "enabled": true },
+  // A custom domain: Cloudflare creates the DNS record and certificate. One subdomain level, so the
+  // free Universal SSL certificate covers it. The speak cache (Cache API) works only on a custom domain.
+  "routes": [{ "pattern": "farmsaathi-api.amittal.dev", "custom_domain": true }],
+  "vars": {
+    // Exact origins allowed to call /api with the session cookie (CORS + the CSRF check).
+    "ALLOWED_ORIGINS": "https://farmsaathi.amittal.dev,http://localhost:5176",
+    // The Hugging Face Space that speaks (POST /speak, GET /health).
+    "VOICE_URL": "https://armaanmittalweb-farmsaathi-voice.hf.space",
+    // Models: change here and redeploy config, no code change.
+    "GROQ_MODEL": "llama-3.3-70b-versatile",
+    "GEMINI_MODEL": "gemini-2.5-flash",
+    "OPENROUTER_MODEL": "meta-llama/llama-3.3-70b-instruct:free",
+    "WORKERS_AI_MODEL": "@cf/meta/llama-3.1-8b-instruct",
+    "EMBED_MODEL": "@cf/baai/bge-m3",
+    "GROQ_STT_MODEL": "whisper-large-v3-turbo",
+    "WORKERS_AI_STT_MODEL": "@cf/openai/whisper-large-v3-turbo",
+    // Global calls per India day, per provider, a little under each free tier.
+    "GROQ_DAILY_CAP": "900",
+    "GEMINI_DAILY_CAP": "200",
+    "OPENROUTER_DAILY_CAP": "45",
+    "WORKERS_AI_DAILY_CAP": "300",
+    "GROQ_STT_DAILY_CAP": "1800",
+    "WORKERS_AI_STT_DAILY_CAP": "300",
+    // Lowest cosine similarity (bge-m3) for a passage to go into the prompt.
+    "RAG_MIN_SCORE": "0.4"
+  },
+  // Secrets (wrangler secret put): INTERNAL_KEY, VOICE_KEY; optionally GROQ_API_KEY, GEMINI_API_KEY,
+  // OPENROUTER_API_KEY. A missing provider key skips that step of the chain.
+  "d1_databases": [{ "binding": "DB", "database_name": "farmsaathi", "database_id": "00000000-0000-0000-0000-000000000000" }],
+  "ai": { "binding": "AI" },
+  "ratelimits": [
+    // 5 sign-ins (and sign-ups and account deletions) per minute per IP.
+    { "name": "LOGIN_LIMITER", "namespace_id": "5101", "simple": { "limit": 5, "period": 60 } },
+    // Everything else under /api, per IP. Generous: farmers often share a carrier IP.
+    { "name": "API_LIMITER", "namespace_id": "5102", "simple": { "limit": 120, "period": 60 } }
+  ],
+  "triggers": { "crons": ["41 21 * * *"] },
+  "dev": { "port": 8790, "local_protocol": "http" }
+}
