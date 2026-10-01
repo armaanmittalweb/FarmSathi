@@ -17,7 +17,7 @@ const PAGE_HEADERS = Object.fromEntries(vercel.headers.find((h) => h.source === 
  * download is small whatever the host does about compression: runtime 14.2 MB -> ~3.7 MB, crop model
  * 4.8 MB -> ~0.2 MB.
  */
-interface Packed { key: 'wasm' | 'leaf' | 'crop'; url: string; file: string; bytes: number }
+interface Packed { key: 'wasm' | 'leaf' | 'crop'; url: string; file: string; bytes: number; raw: number }
 function pack(): Packed[] {
   const cacheDir = join(ROOT, 'node_modules', '.cache', 'fs-models');
   mkdirSync(cacheDir, { recursive: true });
@@ -32,7 +32,7 @@ function pack(): Packed[] {
     const fileName = `${name}.${hash}.${ext}.gz`;
     const file = join(cacheDir, fileName);
     if (!existsSync(file)) writeFileSync(file, gzipSync(raw, { level: 9 }));
-    return { key, url: `/models/${fileName}`, file, bytes: statSync(file).size };
+    return { key, url: `/models/${fileName}`, file, bytes: statSync(file).size, raw: raw.length };
   });
 }
 
@@ -84,7 +84,7 @@ function modelAssets(): Plugin {
     name: 'farmsaathi-models',
     config: () => ({
       define: {
-        __MODEL_ASSETS__: JSON.stringify(Object.fromEntries(packed.map((p) => [p.key, { url: p.url, bytes: p.bytes }]))),
+        __MODEL_ASSETS__: JSON.stringify(Object.fromEntries(packed.map((p) => [p.key, { url: p.url, bytes: p.bytes, raw: p.raw }]))),
       },
     }),
     configResolved(c) { outDir = c.build.outDir; },

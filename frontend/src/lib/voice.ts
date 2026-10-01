@@ -88,7 +88,8 @@ function fakeRecording(onLevel: (v: number) => void, onTick: (s: number) => void
   const done = new Promise<Blob | null>((r) => { resolve = r; });
   const timer = setInterval(() => {
     const t = (performance.now() - started) / 1000;
-    onLevel(0.35 + 0.3 * Math.abs(Math.sin(t * 3.1)) * Math.abs(Math.sin(t * 1.7 + 1)));
+    const syllable = Math.abs(Math.sin(t * 7.3)) * Math.abs(Math.sin(t * 2.3 + 1));
+    onLevel(Math.min(1, 0.06 + 0.9 * syllable * (0.6 + 0.4 * Math.sin(t * 13.7) ** 2)));
     onTick(Math.floor(t));
   }, 33);
   return {

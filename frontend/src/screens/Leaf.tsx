@@ -45,6 +45,7 @@ export function Leaf() {
       setReady(true);
       setView({ s: 'result', preview, result });
     } catch (e) {
+      console.error('leaf check failed', (e as Error)?.stack ?? e);
       const msg = String((e as Error)?.message ?? e);
       setView({ s: 'error', kind: /download|fetch|network|Failed/i.test(msg) ? 'download' : 'image' });
     } finally {

@@ -18,6 +18,8 @@ mkdirSync(OUT, { recursive: true });
 const win = process.platform === 'win32';
 const npx = win ? 'npx.cmd' : 'npx';
 
+try { await fetch(BASE); console.error(`port ${PORT} is already in use; stop the old server first`); process.exit(1); } catch { /* free */ }
+
 if (!process.env.NOBUILD) {
   const b = spawnSync(npx, ['vite', 'build', '--mode', 'mock'], { cwd: WEB, stdio: 'inherit', shell: win });
   if (b.status !== 0) process.exit(1);
@@ -63,7 +65,7 @@ const scenarios = [
     await p.goto(`${BASE}/?lang=${L}&mic=fake`); await p.waitForSelector('.first-run');
     await p.click('button.mic'); await p.waitForSelector('.composer.listening'); await wait(p, 1200); await shot('ask-listening');
     await p.click('.listen-actions .btn.primary'); await p.waitForSelector('.composer.busy'); await shot('ask-transcribing');
-    await p.waitForSelector('.a-card[aria-busy=true]'); await shot('ask-thinking');
+    await p.goto(`${BASE}/?lang=${L}&chat=slow`); await p.waitForSelector('.first-run'); await p.click('.example >> nth=0'); await p.waitForSelector('.a-card[aria-busy=true]'); await wait(p); await shot('ask-thinking');
     await p.goto(`${BASE}/?lang=${L}&chat=limit&fast=1`); await p.waitForSelector('.first-run'); await p.click('.example >> nth=1'); await p.waitForSelector('.notice.warn'); await wait(p); await shot('ask-daily-limit');
     await p.goto(`${BASE}/?lang=${L}&chat=error&fast=1`); await p.waitForSelector('.first-run'); await p.click('.example >> nth=2'); await p.waitForSelector('.notice.error'); await wait(p); await shot('ask-error');
     await p.goto(`${BASE}/?lang=${L}&mic=denied`); await p.waitForSelector('.first-run'); await p.click('button.mic'); await p.waitForSelector('.notice'); await wait(p); await shot('ask-mic-denied');

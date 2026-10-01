@@ -6,7 +6,7 @@
  */
 import type { InferenceSession } from 'onnxruntime-web';
 
-export interface Asset { url: string; bytes: number }
+export interface Asset { url: string; bytes: number; raw: number }
 export const ASSETS = __MODEL_ASSETS__ as { wasm: Asset; leaf: Asset; crop: Asset };
 export type ModelKind = 'leaf' | 'crop';
 const CACHE = 'fs-models-v1';
@@ -41,28 +41,43 @@ export async function pruneOld(): Promise<void> {
 
 type Progress = (loaded: number, total: number) => void;
 
+const isGzip = (b: Uint8Array) => b.length > 2 && b[0] === 0x1f && b[1] === 0x8b;
+
+/**
+ * Fetch one packed file and return its unpacked bytes. Some hosts add Content-Encoding: gzip for .gz files,
+ * so the browser may hand over the bytes already unpacked: check the gzip magic number rather than assume.
+ * Progress is reported in transferred (gzipped) bytes either way.
+ */
 async function fetchGz(asset: Asset, onBytes: (n: number) => void): Promise<ArrayBuffer> {
   const c = await cache();
-  let res = c ? await c.match(asset.url) : undefined;
-  if (!res) {
+  let bytes: Uint8Array;
+  const hit = c ? await c.match(asset.url) : undefined;
+  if (hit) {
+    bytes = new Uint8Array(await hit.arrayBuffer());
+    onBytes(asset.bytes);
+  } else {
     const net = await fetch(asset.url);
     if (!net.ok || !net.body) throw new Error(`download ${asset.url} ${net.status}`);
     const reader = net.body.getReader();
     const parts: Uint8Array[] = [];
+    let scale = 1;
+    let reported = 0;
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
+      if (!parts.length && !isGzip(value)) scale = asset.bytes / asset.raw;
       parts.push(value);
-      onBytes(value.byteLength);
+      const n = Math.min(asset.bytes - reported, Math.round(value.byteLength * scale));
+      reported += n;
+      onBytes(n);
     }
-    const blob = new Blob(parts as BlobPart[], { type: 'application/gzip' });
-    res = new Response(blob);
+    if (reported < asset.bytes) onBytes(asset.bytes - reported);
+    const blob = new Blob(parts as BlobPart[]);
+    bytes = new Uint8Array(await blob.arrayBuffer());
     if (c) await c.put(asset.url, new Response(blob)).catch(() => undefined);
-  } else {
-    onBytes(asset.bytes);
   }
-  const unpacked = res.body!.pipeThrough(new DecompressionStream('gzip'));
-  return new Response(unpacked).arrayBuffer();
+  if (!isGzip(bytes)) return bytes.buffer as ArrayBuffer;
+  return new Response(new Blob([bytes as BlobPart]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
 }
 
 let ortPromise: Promise<typeof import('onnxruntime-web')> | null = null;

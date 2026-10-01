@@ -32,7 +32,7 @@ img { max-width: 100%; display: block; }
 
 /* ---------- shell ---------- */
 .app { min-height: 100dvh; }
-.main { padding: 0 var(--gutter) calc(var(--tab-h) + 24px + env(safe-area-inset-bottom)); max-width: var(--col); margin: 0 auto; }
+.main { padding: 0 var(--gutter) calc(var(--tab-h) + 24px + env(safe-area-inset-bottom)); max-width: calc(var(--col) + 2 * var(--gutter)); margin: 0 auto; }
 .main.ask-main { padding-bottom: 0; }
 
 .top {

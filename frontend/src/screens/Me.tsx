@@ -8,6 +8,8 @@ import { Link, navigate } from '../lib/router';
 import { setState, toast, useStore, type Theme } from '../lib/store';
 import { Icon } from '../ui/Icon';
 import { Notice, Skeleton } from '../ui/parts';
+import { AnswerText } from './Ask';
+import { SCHEME_BY_ID } from '../content/schemes';
 
 const STATES = ['Punjab', 'Haryana', 'Uttar Pradesh', 'Rajasthan', 'Himachal Pradesh', 'Uttarakhand', 'Delhi', 'Madhya Pradesh', 'Bihar', 'Gujarat', 'Maharashtra', 'Karnataka', 'Andhra Pradesh', 'Telangana', 'Tamil Nadu', 'West Bengal', 'Odisha', 'Chhattisgarh', 'Jharkhand', 'Assam', 'Kerala', 'Jammu and Kashmir'];
 const VERSION = __APP_VERSION__;
@@ -337,9 +339,9 @@ export function Chats() {
                   <span className="chat-q" lang={c.lang}>{c.question}</span>
                   <span className="small muted num">{shortDate(c.at, lang)}, {clock(new Date(c.at), lang)}</span>
                 </summary>
-                <div className="a-text" lang={c.lang}>{c.answer.split(/\n{2,}/).map((p, i) => <p key={i}>{p}</p>)}</div>
+                <div lang={c.lang}><AnswerText text={c.answer} /></div>
                 {c.sources.length > 0 && (
-                  <div className="chips">{c.sources.map((s) => <Link key={s.id} className="chip src" to={`/schemes/${s.id}`}><Icon name="schemes" size={18} />{s.title}</Link>)}</div>
+                  <div className="chips">{c.sources.filter((s) => SCHEME_BY_ID.has(s.id)).map((s) => <Link key={s.id} className="chip src" to={`/schemes/${s.id}`}><Icon name="schemes" size={18} />{SCHEME_BY_ID.get(s.id)!.short[lang]}</Link>)}</div>
                 )}
               </details>
             </li>

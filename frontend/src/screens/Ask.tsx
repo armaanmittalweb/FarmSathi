@@ -2,7 +2,9 @@ import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type Poin
 import type { ChatTurn, Lang } from '../contract';
 import { api, ApiFail } from '../api';
 import { clock, shortDate, useLang, useT } from '../i18n';
+import { SCHEME_BY_ID } from '../content/schemes';
 import { Link } from '../lib/router';
+import { advise, cachedForecast } from '../lib/weather';
 import { getState, setState, useStore } from '../lib/store';
 import { MAX_SECONDS, record, speakAnswer, type MicError, type Playback, type Recording, type VoiceUsed } from '../lib/voice';
 import { Icon } from '../ui/Icon';
@@ -40,8 +42,8 @@ export function Ask() {
   }, [draft]);
 
   useLayoutEffect(() => {
-    if (thread.length || pending) endRef.current?.scrollIntoView({ block: 'end' });
-  }, [thread.length, pending, phase]);
+    if (thread.length || pending || problem) endRef.current?.scrollIntoView({ block: 'end' });
+  }, [thread.length, pending, phase, problem]);
 
   const offline = !online;
   const limited = problem?.kind === 'limit' && problem.until > Date.now();
@@ -89,31 +91,46 @@ export function Ask() {
             </div>
           </>
         )}
-        {problem?.kind === 'limit' && limited && (
-          <Notice kind="warn" role="alert" icon="warn" title={t.ask.limitTitle}>{t.ask.limitBody(clock(problem.until, lang))}</Notice>
-        )}
-        {problem?.kind === 'offline' && !offline && <Notice kind="offline" role="alert" title={t.ask.offlineTitle}>{t.ask.offlineBody}</Notice>}
-        {problem?.kind === 'error' && (
-          <Notice kind="error" role="alert" title={problem.retry ? t.ask.error : t.ask.tooLong}
-            action={problem.retry ? <button type="button" className="btn secondary" onClick={() => void send(problem.retry)}>{t.common.retry}</button> : undefined} />
-        )}
-        {problem?.kind === 'mic' && (
-          <Notice kind={problem.err === 'denied' ? 'warn' : 'info'} role="alert" icon="mic" title={problem.err === 'denied' ? t.ask.micDeniedTitle : undefined}>
-            {problem.err === 'denied' ? t.ask.micDeniedBody : t.ask.micMissing}
-          </Notice>
-        )}
-        {problem?.kind === 'heard' && <Notice kind="info" role="alert" icon="mic">{t.ask.heardNothing}</Notice>}
-        {problem?.kind === 'short' && <Notice kind="info" role="alert" icon="mic">{t.ask.tooShort}</Notice>}
         <div ref={endRef} className="thread-end" />
       </div>
 
       <Composer
         text={text} setText={setText} inputRef={inputRef} phase={phase} setPhase={setPhase}
-        disabled={offline || limited} onSubmit={submit} showHint={thread.length === 0 && !pending}
+        disabled={offline || limited} onSubmit={submit} showHint={thread.length === 0 && !pending && !problem}
         onHeard={(said) => void send(said)} onProblem={setProblem}
+        notice={problem && <ProblemNotice problem={problem} limited={limited} offline={offline} onRetry={(q) => void send(q)} onClose={() => setProblem(null)} />}
       />
     </div>
   );
+}
+
+/** Problems show right above the mic and text box, where the farmer is looking, not at the end of the thread. */
+function ProblemNotice({ problem, limited, offline, onRetry, onClose }: { problem: Problem; limited: boolean; offline: boolean; onRetry: (q: string) => void; onClose: () => void }) {
+  const t = useT();
+  const lang = useLang();
+  if (!problem) return null;
+  const close = <button type="button" className="btn secondary" onClick={onClose}>{t.common.close}</button>;
+  switch (problem.kind) {
+    case 'limit':
+      return limited ? <Notice kind="warn" role="alert" title={t.ask.limitTitle}>{t.ask.limitBody(clock(problem.until, lang))}</Notice> : null;
+    case 'offline':
+      return offline ? null : <Notice kind="offline" role="alert" title={t.ask.offlineTitle} action={close}>{t.ask.offlineBody}</Notice>;
+    case 'error':
+      return (
+        <Notice kind="error" role="alert" title={problem.retry ? t.ask.error : t.ask.tooLong}
+          action={<>{problem.retry && <button type="button" className="btn primary" onClick={() => onRetry(problem.retry)}>{t.common.retry}</button>}{close}</>} />
+      );
+    case 'mic':
+      return (
+        <Notice kind={problem.err === 'denied' ? 'warn' : 'info'} role="alert" icon="mic" title={problem.err === 'denied' ? t.ask.micDeniedTitle : undefined} action={close}>
+          {problem.err === 'denied' ? t.ask.micDeniedBody : t.ask.micMissing}
+        </Notice>
+      );
+    case 'heard':
+      return <Notice kind="info" role="alert" icon="mic" action={close}>{t.ask.heardNothing}</Notice>;
+    case 'short':
+      return <Notice kind="info" role="alert" icon="mic" action={close}>{t.ask.tooShort}</Notice>;
+  }
 }
 
 function FirstRun({ lang, guest, signedIn, onPick, disabled }: { lang: Lang; guest: ChatTurn[]; signedIn: boolean; onPick: (q: string) => void; disabled: boolean }) {
@@ -125,6 +142,7 @@ function FirstRun({ lang, guest, signedIn, onPick, disabled }: { lang: Lang; gue
         <h2 className="greet-title">{t.ask.greetTitle}</h2>
         <p className="lede">{t.ask.greetBody}</p>
       </div>
+      <TodayStrip />
       <section className="section" aria-labelledby="try">
         <h3 id="try" className="label">{t.ask.tryAsking}</h3>
         <ul className="examples list">
@@ -159,25 +177,58 @@ function FirstRun({ lang, guest, signedIn, onPick, disabled }: { lang: Lang; gue
   );
 }
 
+/** Today's weather and the first piece of field advice for the saved village, from the last saved forecast (no fetch). */
+function TodayStrip() {
+  const t = useT();
+  const lang = useLang();
+  const place = useStore((s) => s.place);
+  const f = place ? cachedForecast(place) : null;
+  if (!place || !f || Date.now() - f.at > 12 * 3600_000) return null;
+  const first = advise(f, lang).find((a) => a.kind === 'warn') ?? advise(f, lang)[0];
+  return (
+    <Link to="/weather" className={first?.kind === 'warn' ? 'today-strip warn' : 'today-strip'}>
+      <span className="ts-temp num">{Math.round(f.current.temp)}°</span>
+      <span className="ts-text"><b>{place.gps ? t.weather.nearYou : place.name}</b><span>{first?.text}</span></span>
+      <Icon name="forward" />
+    </Link>
+  );
+}
+
 let current: Playback | null = null;
+
+const URL_RE = /(https?:\/\/[^\s)]+[^\s).,।]|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.gov\.in(?:\/[^\s).,।]*)?)/gi;
+
+/** Paragraphs with web addresses made tappable (answers often name pmkisan.gov.in and the like). */
+export function AnswerText({ text }: { text: string }) {
+  return (
+    <div className="a-text">
+      {text.split(/\n{2,}/).map((p, i) => (
+        <p key={i}>
+          {p.split(URL_RE).map((part, j) => (j % 2 === 1
+            ? <a key={j} href={part.startsWith('http') ? part : `https://${part}`} target="_blank" rel="noopener noreferrer">{part.replace(/^https?:\/\//, '')}</a>
+            : part))}
+        </p>
+      ))}
+    </div>
+  );
+}
 
 export function Turn({ turn, compact }: { turn: ChatTurn; compact?: boolean }) {
   const t = useT();
   const lang = useLang();
   const at = new Date(turn.at);
-  const paras = turn.answer.split(/\n{2,}/);
   return (
     <article className={`turn${compact ? ' compact' : ''}`}>
       <div className="q-bubble" lang={turn.lang}><span className="vh">{t.ask.you}: </span>{turn.question}</div>
       <div className="a-card" lang={turn.lang}>
         <span className="vh">{t.ask.answer}: </span>
-        <div className="a-text">{paras.map((p, i) => <p key={i}>{p}</p>)}</div>
+        <AnswerText text={turn.answer} />
         <div className="a-foot" lang={lang}>
           <Listen text={turn.answer} lang={turn.lang} />
           {turn.sources.length > 0 && (
             <div className="chips" aria-label={t.ask.sources}>
-              {turn.sources.map((s) => s.kind === 'scheme'
-                ? <Link key={s.id} className="chip src" to={`/schemes/${s.id}`}><Icon name="schemes" size={18} />{s.title}</Link>
+              {turn.sources.map((s) => s.kind === 'scheme' && SCHEME_BY_ID.has(s.id)
+                ? <Link key={s.id} className="chip src" to={`/schemes/${s.id}`}><Icon name="schemes" size={18} />{SCHEME_BY_ID.get(s.id)!.short[lang]}</Link>
                 : <span key={s.id} className="chip src">{s.title}</span>)}
             </div>
           )}
@@ -222,8 +273,8 @@ function Listen({ text, lang }: { text: string; lang: Lang }) {
   );
 }
 
-function Composer({ showHint, text, setText, inputRef, phase, setPhase, disabled, onSubmit, onHeard, onProblem }: {
-  showHint: boolean; text: string; setText: (v: string) => void; inputRef: React.RefObject<HTMLTextAreaElement | null>; phase: Phase; setPhase: (p: Phase) => void;
+function Composer({ notice, showHint, text, setText, inputRef, phase, setPhase, disabled, onSubmit, onHeard, onProblem }: {
+  notice: React.ReactNode; showHint: boolean; text: string; setText: (v: string) => void; inputRef: React.RefObject<HTMLTextAreaElement | null>; phase: Phase; setPhase: (p: Phase) => void;
   disabled: boolean; onSubmit: (e: FormEvent) => void; onHeard: (said: string) => void; onProblem: (p: Problem) => void;
 }) {
   const t = useT();
@@ -309,6 +360,7 @@ function Composer({ showHint, text, setText, inputRef, phase, setPhase, disabled
   const hasText = text.trim().length > 0;
   return (
     <form className="composer" onSubmit={onSubmit}>
+      {notice && <div className="composer-notice">{notice}</div>}
       <label className="vh" htmlFor="q">{t.ask.inputLabel}</label>
       <div className="q-field">
         <textarea
