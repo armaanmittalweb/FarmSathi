@@ -1,0 +1,97 @@
+/* FarmSaathi tokens. One field green for actions, turmeric for warnings, deep ink, warm paper.
+   Dark is its own palette, not an inversion. Body text is >= 7:1 against its surface in both. */
+:root {
+  --paper: #f5f6f1;
+  --card: #ffffff;
+  --sunk: #eceee6;
+  --ink: #18221b;
+  --ink-2: #2f3c35;
+  --muted: #4a564f;
+  --line: #d3d9cf;
+  --line-strong: #b4bdb1;
+  --field: #2b6a3c;
+  --field-hover: #22562f;
+  --field-ink: #ffffff;
+  --field-soft: #e3efe1;
+  --field-text: #23592f;
+  --turmeric: #9a6400;
+  --turmeric-soft: #f7ecd4;
+  --turmeric-text: #6b4600;
+  --danger: #a8321f;
+  --danger-soft: #f8e4df;
+  --focus: #1f5fbf;
+  --bubble-me: #2b6a3c;
+  --bubble-me-ink: #ffffff;
+  --meter: #2b6a3c;
+  --shadow: 0 1px 0 rgb(24 34 27 / 0.06);
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --tab-h: 68px;
+  --top-h: 60px;
+  --rail-w: 248px;
+  --col: 720px;
+  --gutter: 16px;
+
+  --f-ui: 'Mukta', 'Noto Sans Gurmukhi', system-ui, sans-serif;
+  --f-pa: 'Noto Sans Gurmukhi', 'Mukta', sans-serif;
+  --f-num: 'IBM Plex Mono', ui-monospace, monospace;
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --paper: #111611;
+  --card: #182019;
+  --sunk: #0c100c;
+  --ink: #e6ece6;
+  --ink-2: #c9d3cb;
+  --muted: #a3b0a7;
+  --line: #2c372e;
+  --line-strong: #435045;
+  --field: #8fd09f;
+  --field-hover: #a6dcb3;
+  --field-ink: #0f1a12;
+  --field-soft: #1d3324;
+  --field-text: #9fdbae;
+  --turmeric: #e9b64e;
+  --turmeric-soft: #372b13;
+  --turmeric-text: #f1cc7e;
+  --danger: #f08a73;
+  --danger-soft: #3a1d16;
+  --focus: #8fb4f5;
+  --bubble-me: #24442d;
+  --bubble-me-ink: #eef6ef;
+  --meter: #8fd09f;
+  --shadow: none;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #111611;
+    --card: #182019;
+    --sunk: #0c100c;
+    --ink: #e6ece6;
+    --ink-2: #c9d3cb;
+    --muted: #a3b0a7;
+    --line: #2c372e;
+    --line-strong: #435045;
+    --field: #8fd09f;
+    --field-hover: #a6dcb3;
+    --field-ink: #0f1a12;
+    --field-soft: #1d3324;
+    --field-text: #9fdbae;
+    --turmeric: #e9b64e;
+    --turmeric-soft: #372b13;
+    --turmeric-text: #f1cc7e;
+    --danger: #f08a73;
+    --danger-soft: #3a1d16;
+    --focus: #8fb4f5;
+    --bubble-me: #24442d;
+    --bubble-me-ink: #eef6ef;
+    --meter: #8fd09f;
+    --shadow: none;
+    color-scheme: dark;
+  }
+}
