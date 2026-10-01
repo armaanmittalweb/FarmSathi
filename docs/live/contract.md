@@ -57,7 +57,7 @@ Model names are vars so they can be changed without a deploy. Only the question,
 
 **Speech to text**: Groq `whisper-large-v3-turbo`, then Workers AI `@cf/openai/whisper-large-v3-turbo`.
 
-**Limits**: 30 chat messages, 30 transcriptions and 60 speak requests per visitor per day (keyed by IP hash + session), and a global daily cap per provider stored in D1 (`GROQ_DAILY_CAP` etc. vars). Over the limit → 429 `rate_limited` with a localised message and `retryAfter`.
+**Limits**: 30 chat messages, 30 transcriptions and 60 speak requests per visitor per day (keyed by IP hash + session), and a global daily cap per provider stored in D1 (`GROQ_DAILY_CAP` etc. vars). Over the limit → 429 `rate_limited` with a localised message and `retryAfter`. A "day" is an India Standard Time day: limits reset at midnight IST and `retryAfter` is the seconds until then (details below).
 
 ## Public data
 
@@ -68,6 +68,24 @@ Model names are vars so they can be changed without a deploy. Only the question,
 | GET /internal/stats, POST /internal/prune | `x-internal-key` = `INTERNAL_KEY`, else 404. Stats: `{ users, chats, dbBytes, today: { chat, transcribe, speak }, byProvider: Record<string, number>, lastStepToday: number }` |
 
 Weather is called from the browser straight to Open-Meteo (no key; cache an hour per village in localStorage). Leaf check and crop advice run in the browser (below); the Worker has no routes for them.
+
+## Backend details (decided while building `worker/`)
+
+Gaps in the first draft, filled with the simplest consistent choice. The app can rely on all of these.
+
+- **Error language**: the body's `lang` wins, then `?lang=`, then `Accept-Language` (hi/pa), else English. Every JSON route accepts an optional `lang`, including login, logout, import and wake.
+- **CSRF details**: bodiless POSTs (`/api/auth/logout`, `/api/voice/wake`) still need `Content-Type: application/json` (send `{}`). `/api/transcribe` takes `multipart/form-data` only; every other state change takes JSON only.
+- **Logins**: a mobile number may be written with `+91`, `91` or a leading `0`, with spaces or dashes, and must start with 6-9. Password 8-200 characters. Sign-up, login and account deletion share the 5/min/IP limiter. A wrong password on `DELETE /api/me` is 403 `forbidden`.
+- **Profile limits**: name ≤ 80 chars, state and district ≤ 60, up to 20 crops of ≤ 40 chars (deduplicated), `farmSizeAcres` 0-100,000, lat/lon in range; `null` clears a field; unknown keys are ignored; any bad field → 400 and nothing is saved.
+- **Saved chats**: `?before=` with an id the account doesn't have → 400. Import is all-or-nothing and idempotent per account (the phone's turn `id` is kept; ids match `[A-Za-z0-9_-]{1,64}`); question ≤ 1,000 chars, answer ≤ 8,000, ≤ 5 sources. Chats older than 180 days are pruned.
+- **Chat**: `history` entries need `role` `user` or `assistant`; others are dropped; only the last 6 are used. A guest's `profile` is read only for `crops`, `state` and `farmSizeAcres`; for a signed-in farmer the stored profile is used instead. `sources` holds scheme passages only (`kind: 'scheme'`, `id` = the scheme id used by `/api/schemes`, `title` in the request's language); notes go into the prompt but are not returned as chips. An answer in the wrong script counts as a failed step (kept only as a last resort if no later step does better). Every step at its cap → 429 `rate_limited`; every step failing → 503 `unavailable`.
+- **Daily limits**: the visitor key is SHA-256 of (IST day, IP, account id or `guest`), so it changes daily, never stores an IP, and a signed-in farmer has an allowance separate from guests on the same carrier IP. Workers rate limiter `API_LIMITER`: 120 requests/min/IP on all of `/api` except `/api/test` (429 with `retryAfter: 60`).
+- **Transcription**: accepted types `audio/webm`, `video/webm`, `audio/ogg`, `audio/mp4`, `video/mp4`, `audio/x-m4a`, `audio/wav` (and its aliases); anything else → 400. Over 2 MB → 413 `too_large`. The 60-second limit is the app recorder's job (the server enforces the 2 MB cap). Empty speech returns 200 `{ text: '' }`. Both steps at their caps → 429; both failing → 503.
+- **Speak**: the text is trimmed before hashing (`SHA-256(lang + text)`). A cached clip does not count toward the 60/day. A 429 from `/api/speak` also carries `fallback: 'device'`. The Worker waits up to 25 s for the Space (a long answer takes a while on 2 free vCPUs); the 12 s step timeout applies to the chat and transcription providers. `/api/voice/wake` pings the Space's `/health` at most once a minute per Worker isolate.
+- **Schemes**: `category` is the stable id from `schemes.json` (`income_support`, `insurance`, `credit`, `advisory`, `irrigation`, `market_access`) for the app to label. `eligibility` and `howToApply` exist only in English in `schemes.json`; the Hindi and Punjabi versions live in `worker/data/schemes.local.json`.
+- **Vars** (all in `worker/wrangler.jsonc`): models `GROQ_MODEL`, `GEMINI_MODEL`, `OPENROUTER_MODEL`, `WORKERS_AI_MODEL`, `EMBED_MODEL`, `GROQ_STT_MODEL`, `WORKERS_AI_STT_MODEL`; caps `GROQ_DAILY_CAP` (900), `GEMINI_DAILY_CAP` (200), `OPENROUTER_DAILY_CAP` (45), `WORKERS_AI_DAILY_CAP` (300), `GROQ_STT_DAILY_CAP` (1,800), `WORKERS_AI_STT_DAILY_CAP` (300), counted in calls per IST day; `RAG_MIN_SCORE` (0.4, the similarity floor); `PASSWORD_ITERATIONS` (100,000; lower it only if sign-ins hit the free plan's CPU limit, since each hash stores its own count).
+- **Stats**: `today` counts requests that passed the visitor limit. `byProvider` is today's successful answers per provider: `groq`, `gemini`, `openrouter`, `workers-ai` (chat), `groq-stt`, `workers-ai-stt` (transcription) and `voice` (new clips from the Space); providers with none are absent. `lastStepToday` is the 1-based position, in that request's own chain order, of the step that answered the latest chat today (so Gemini answering Punjabi is 1), or 0 when there was none. `/internal/prune` returns `{ chats, sessions, counters }` (rows deleted).
+- **Voice Space**: spells numbers out before synthesis (the MMS vocabularies have almost no digits), so "₹6,000" is read as words in all three languages.
 
 ## Shapes
 
