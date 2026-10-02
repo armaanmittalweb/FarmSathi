@@ -34,7 +34,7 @@ export interface Bindings {
   ALLOWED_ORIGINS?: string
   /** Shared with the Switchboard; unlocks /internal/*. Unset = those routes 404. */
   INTERNAL_KEY?: string
-  /** The Hugging Face Space, e.g. https://armaanmittalweb-farmsaathi-voice.hf.space */
+  /** The voice service on Modal, e.g. https://armaanmittalweb--farmsaathi-voice.modal.run */
   VOICE_URL?: string
   /** Sent to the Space as x-voice-key. */
   VOICE_KEY?: string

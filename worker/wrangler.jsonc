@@ -11,7 +11,7 @@
     // Exact origins allowed to call /api with the session cookie (CORS + the CSRF check).
     "ALLOWED_ORIGINS": "https://farmsaathi.amittal.dev,http://localhost:5176",
     // The Hugging Face Space that speaks (POST /speak, GET /health).
-    "VOICE_URL": "https://armaanmittalweb-farmsaathi-voice.hf.space",
+    "VOICE_URL": "https://armaanmittalweb--farmsaathi-voice.modal.run",
     // Models: change here and redeploy config, no code change.
     "GROQ_MODEL": "llama-3.3-70b-versatile",
     "GEMINI_MODEL": "gemini-2.5-flash",
