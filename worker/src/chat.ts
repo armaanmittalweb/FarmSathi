@@ -5,7 +5,8 @@
  */
 import type { ChatReply, Lang } from './contract'
 import { MAX_QUESTION, profileOf, type UserRow } from './accounts'
-import { runChain, STEP_TIMEOUT_MS, type FarmFacts, type HistoryTurn } from './chain'
+import { refuse, runChain, STEP_TIMEOUT_MS, type FarmFacts, type HistoryTurn } from './chain'
+import { isInjection } from './guard'
 import { capOf, fail, langOf, readJson, secondsToNextDay, setLang, takeVisitor, type App, type Ctx, type Deps } from './http'
 import { isLang } from './i18n'
 import { DEFAULT_EMBED_MODEL, DEFAULT_MIN_SCORE, Knowledge, sourceFor } from './knowledge'
@@ -13,11 +14,12 @@ import { DEFAULT_EMBED_MODEL, DEFAULT_MIN_SCORE, Knowledge, sourceFor } from './
 export const HISTORY_TURNS = 6
 const MAX_HISTORY_TEXT = 4000
 
-/** Up to the last 6 well-formed turns; anything else in `history` is dropped. */
+/** Up to the last 6 well-formed turns; anything else in `history` is dropped, and so is any turn that
+ *  tries to rewrite the rules (the client sends the history, so it could be made up). */
 export function historyOf(v: unknown): HistoryTurn[] {
   if (!Array.isArray(v)) return []
   return v
-    .filter((h): h is HistoryTurn => !!h && (h.role === 'user' || h.role === 'assistant') && typeof h.text === 'string' && h.text.trim().length > 0)
+    .filter((h): h is HistoryTurn => !!h && (h.role === 'user' || h.role === 'assistant') && typeof h.text === 'string' && h.text.trim().length > 0 && !isInjection(h.text))
     .slice(-HISTORY_TURNS)
     .map(h => ({ role: h.role, text: h.text.trim().slice(0, MAX_HISTORY_TEXT) }))
 }
@@ -56,6 +58,13 @@ export function chatRoutes(app: App, deps: Deps) {
     }
     if (!(await takeVisitor(c, sql, t, 'chat'))) return fail(c, 429, 'rate_limited', 'chat_limit', { retryAfter: secondsToNextDay(t) })
 
+    // Attempts to rewrite the rules get the refusal without reaching a provider (they still count
+    // against the visitor's daily questions, above).
+    if (isInjection(question)) {
+      const r = await refuse({ sql, now: t }, lang, 'injection')
+      return c.json({ text: r.text, lang, sources: [], provider: 'guard', turnId: null } satisfies ChatReply)
+    }
+
     const ai = deps.ai ? deps.ai(c.env) : c.env.AI
     const matches = await knowledge.retrieve(question, sql, ai, c.env.EMBED_MODEL || DEFAULT_EMBED_MODEL, capOf(c.env.RAG_MIN_SCORE, DEFAULT_MIN_SCORE))
     const result = await runChain(
@@ -67,6 +76,8 @@ export function chatRoutes(app: App, deps: Deps) {
         ? fail(c, 429, 'rate_limited', 'all_capped', { retryAfter: secondsToNextDay(t) })
         : fail(c, 503, 'unavailable', 'chat_unavailable')
     }
+
+    if (result.refused) return c.json({ text: result.text, lang, sources: [], provider: 'guard', turnId: null } satisfies ChatReply)
 
     const sources = matches.map(m => sourceFor(m.passage, lang)).filter(s => s !== null)
     let turnId: string | null = null
