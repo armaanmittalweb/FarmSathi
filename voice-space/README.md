@@ -64,7 +64,8 @@ Hugging Face Docker Spaces need a paid plan now, so the voice runs on Modal's fr
 1. GitHub Actions (`.github/workflows/voice-image.yml`) builds this folder's Dockerfile on every
    push to `main` that touches it and publishes `ghcr.io/armaanmittalweb/farmsaathi-voice`.
 2. `modal secret create farmsaathi-voice VOICE_KEY=<the Worker's VOICE_KEY>`
-3. `modal deploy voice-space/modal_app.py`: one container at most, 2 cores and 6 GB, scaled to
+3. `VOICE_IMAGE_TAG=<the commit CI built> modal deploy voice-space/modal_app.py` (Modal caches
+   `latest`, so name the commit): one container at most, 2 cores and 6 GB, scaled to
    zero after 3 idle minutes. The URL it prints is the Worker's `VOICE_URL` var.
 4. Check: `curl <that URL>/health`.
 

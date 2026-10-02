@@ -36,6 +36,9 @@ HEARS = {
     "pa": ("OpenVoiceOS/ai4bharat-indicconformer-pa-onnx", "a02bd2a0b75d41bd26c9f1e6d7e520a8f83f468d"),
 }
 HEAR_FILES = ["config.json", "vocab.txt", "model.onnx", "model.onnx_data"]
+# A plain directory per language, not the Hugging Face cache: onnxruntime refuses external weights
+# reached through the cache's symlinks ("External data path escapes model directory").
+HEAR_DIR = os.environ.get("HEAR_DIR", os.path.join(os.path.expanduser("~"), "stt"))
 MAX_AUDIO_BYTES = 2 * 1024 * 1024 + 64 * 1024
 MAX_SECONDS = 65  # the app stops recording at 60
 RATE = 16_000
@@ -83,15 +86,13 @@ class IndicTranscriber:
     def __init__(self) -> None:
         import onnx_asr
         import onnxruntime as ort
-        from huggingface_hub import snapshot_download
 
         opts = ort.SessionOptions()
         opts.intra_op_num_threads = max(1, os.cpu_count() or 1)
         self._lock = threading.Lock()
         self._models = {}
-        for lang, (repo, rev) in HEARS.items():
-            path = snapshot_download(repo, revision=rev, allow_patterns=HEAR_FILES)
-            self._models[lang] = onnx_asr.load_model("nemo-conformer-ctc", path, sess_options=opts)
+        for lang in HEARS:
+            self._models[lang] = onnx_asr.load_model("nemo-conformer-ctc", os.path.join(HEAR_DIR, lang), sess_options=opts)
 
     def __call__(self, wave: "np.ndarray", lang: str) -> str:
         with self._lock:
