@@ -1,12 +1,16 @@
 import type { Me, Profile } from '../contract';
-import { api } from '../api';
+import { api, MOCK } from '../api';
+import { load, save } from './storage';
 import { getState, setState } from './store';
 
 /** Check the session cookie once at start. Signed-out and offline both just leave the app as a guest. */
 export async function checkSession(): Promise<void> {
+  // Guests never signed in on this phone: skip the call (and its 401) entirely.
+  if (!MOCK && !load<boolean>('session', false)) { setState({ meChecked: true }); return; }
   try {
     const me = await api.me();
     if (me) adopt(me, false);
+    else save('session', null);
   } catch {
     // offline or API down: carry on as a guest with the phone's copy
   } finally {
@@ -29,6 +33,7 @@ export function adopt(me: Me, fresh: boolean) {
     farmSizeAcres: me.profile.farmSizeAcres ?? local.farmSizeAcres,
     lang: s.lang,
   };
+  save('session', true);
   setState({ me: { ...me, profile: merged }, profile: merged, importOffer: fresh ? s.guest.length : 0 });
   const changed = (Object.keys(merged) as (keyof Profile)[]).filter((k) => JSON.stringify(merged[k]) !== JSON.stringify(me.profile[k]));
   if (changed.length) void api.patchMe(Object.fromEntries(changed.map((k) => [k, merged[k]])) as Partial<Profile>, s.lang).catch(() => undefined);
@@ -64,5 +69,6 @@ export async function importGuest(): Promise<void> {
 
 export async function signOut(): Promise<void> {
   await api.logout(getState().lang).catch(() => undefined);
+  save('session', null);
   setState({ me: null, thread: [], importOffer: 0 });
 }

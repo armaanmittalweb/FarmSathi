@@ -105,6 +105,7 @@ const en = {
     downloading: 'Downloading the leaf checker',
     checking: 'Looking at the leaf…',
     mostLikely: 'Most likely',
+    bestGuess: 'Best guess',
     confidence: 'Confidence',
     others: 'Other possibilities',
     healthyTitle: 'No disease seen',
@@ -223,6 +224,7 @@ const en = {
   },
 
   me: {
+    signedIn: 'Signed in with',
     guestTitle: 'Your chats stay on this phone',
     guestBody: 'An account keeps your chats and farm details on any phone. It is optional; everything works without one.',
     signedInAs: (login: string) => `Signed in as ${login}`,

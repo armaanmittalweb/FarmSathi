@@ -80,7 +80,7 @@ export function Soil() {
       setResult({ r, input });
       setSaved(false);
       setPhase('result');
-      requestAnimationFrame(() => document.getElementById('crops-title')?.focus());
+      requestAnimationFrame(() => { window.scrollTo(0, 0); document.getElementById('crops-title')?.focus({ preventScroll: true }); });
     } catch {
       setPhase('error');
     }
@@ -105,7 +105,6 @@ export function Soil() {
             id={`soil-${k}`} className="input" inputMode="decimal" autoComplete="off" value={values[k]}
             onChange={(e) => set(k, e.target.value)} aria-invalid={!!errors[k]}
             aria-describedby={[f.card || f.hint || prefilled.has(k) ? hintId : '', errors[k] ? errId : ''].filter(Boolean).join(' ') || undefined}
-            placeholder={k === 'ph' ? '6.5' : undefined}
           />
           {f.unit && <span className="unit">{f.unit}</span>}
         </div>

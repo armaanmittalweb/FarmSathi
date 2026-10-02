@@ -152,11 +152,12 @@ function Result({ preview, result }: { preview: string; result: LeafResult }) {
     <>
       <section className="card leaf-result" aria-labelledby="verdict">
         <img className="leaf-photo band" src={preview} alt={t.leaf.photoAlt} />
+        <div className="leaf-detail">
         {unsure && <Notice kind="warn" title={t.leaf.unsureTitle}>{t.leaf.unsureBody}</Notice>}
-        <p className="label">{t.leaf.mostLikely}</p>
-        <h2 id="verdict" className={`verdict${healthy ? ' healthy' : ''}`}>
-          {healthy && <Icon name="check" size={28} />}
-          <span>{crop} <span className="dot" aria-hidden="true">·</span> {healthy ? t.leaf.healthyTitle : c.name[lang]}</span>
+        <p className="label">{unsure ? t.leaf.bestGuess : t.leaf.mostLikely}</p>
+        <h2 id="verdict" className={`verdict${healthy && !unsure ? ' healthy' : ''}${unsure ? ' unsure' : ''}`}>
+          {healthy && !unsure && <Icon name="check" size={28} />}
+          <span>{crop} <span className="dot" aria-hidden="true">·</span> {healthy && !unsure ? t.leaf.healthyTitle : c.name[lang]}</span>
         </h2>
         <div className="conf">
           <div className="conf-row"><span>{t.leaf.confidence}</span><Pct p={best.p} /></div>
@@ -169,7 +170,7 @@ function Result({ preview, result }: { preview: string; result: LeafResult }) {
               const rc = condition(r.label);
               return (
                 <li key={r.label} className="other-row">
-                  <span>{cropShort(rc.crop, lang)} · {rc.disease ? rc.name[lang] : rc.name[lang]}</span>
+                  <span>{cropShort(rc.crop, lang)} · {rc.name[lang]}</span>
                   <Pct p={r.p} />
                 </li>
               );
@@ -177,6 +178,7 @@ function Result({ preview, result }: { preview: string; result: LeafResult }) {
           </ul>
         </div>
         <p className="small muted num-note">{t.leaf.tookMs(result.ms)}</p>
+        </div>
       </section>
 
       {!unsure && (

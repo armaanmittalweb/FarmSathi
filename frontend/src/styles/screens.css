@@ -94,10 +94,11 @@
 .guide-list { list-style: none; display: grid; gap: 6px; }
 .guide-list li { display: flex; gap: 10px; align-items: baseline; font-weight: 600; }
 .guide-list .num { color: var(--field-text); font-size: 15px; }
-@media (max-width: 400px) { .guide-card { grid-template-columns: 1fr; } .frame { width: 112px; } }
-.leaf-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 480px) { .guide-card { grid-template-columns: 96px 1fr; gap: 16px; align-items: start; } .frame { width: 96px; } .frame .c { width: 20px; height: 20px; border-width: 3px; } .frame-leaf { inset: 16px; } }
+@media (max-width: 340px) { .guide-card { grid-template-columns: 1fr; } }
+.leaf-actions { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 560px) { .leaf-actions { grid-template-columns: 1fr 1fr; } }
 .leaf-actions .btn { min-height: 60px; }
-@media (max-width: 380px) { .leaf-actions { grid-template-columns: 1fr; } }
 .size-note { display: flex; gap: 8px; align-items: flex-start; }
 .size-note .icon { margin-top: 3px; }
 .knows { display: grid; gap: 6px; padding: 16px; border-radius: var(--radius); background: var(--sunk); }
@@ -217,21 +218,23 @@
 /* ---------- Me ---------- */
 .acct-row { display: flex; align-items: center; gap: 14px; }
 .acct-row .avatar { width: 52px; height: 52px; }
-.login { display: block; }
+.acct-who { display: grid; gap: 2px; min-width: 0; }
+.acct-who .login { font-size: 22px; font-weight: 500; overflow-wrap: anywhere; }
 .rows { display: grid; }
 .rows > * + * { margin-top: 0; border-top: 1px solid var(--line); }
 .row-link { display: grid; grid-template-columns: 24px 1fr 24px; gap: 14px; align-items: center; min-height: 72px; padding: 10px 16px; color: var(--ink); text-decoration: none; }
 .row-link > span { display: grid; line-height: 1.35; min-width: 0; }
 .row-link:hover { background: var(--sunk); }
 .row-link .icon:last-child { color: var(--muted); }
-.farm .field + .field, .farm .grid2 + .field, .farm .field + .grid2 { margin-top: 16px; }
+.farm > .field + .field, .farm > .grid2 + .field, .farm > .field + .grid2 { margin-top: 16px; }
+.farm .grid2 { align-items: start; }
 .crop-chip { min-height: 44px; }
 .crop-chip .icon { color: var(--muted); }
 .chip.add { border-style: dashed; color: var(--field-text); }
 .with-unit.narrow { max-width: 220px; }
 .with-unit.narrow .input { padding-right: 80px; }
 .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1.5px solid var(--line-strong); border-radius: var(--radius); padding: 3px; gap: 3px; background: var(--card); }
-.seg button { min-height: 48px; border: 0; border-radius: 9px; background: transparent; font-weight: 600; color: var(--ink-2); padding: 0 8px; }
+.seg button { min-height: 48px; font-size: 16px; line-height: 1.2; border: 0; border-radius: 9px; background: transparent; font-weight: 600; color: var(--ink-2); padding: 0 8px; }
 .seg button[aria-pressed='true'] { background: var(--ink); color: var(--paper); }
 .settings .field + .field { margin-top: 16px; }
 .danger-text { color: var(--danger); justify-self: start; }
@@ -252,3 +255,14 @@
 .nf-code { font-size: 64px; line-height: 1; color: var(--line-strong); font-weight: 600; }
 .composer-notice { grid-column: 1 / -1; margin-bottom: 4px; }
 .composer-notice .notice .btn { min-height: 48px; }
+.leaf-detail > * + * { margin-top: 14px; }
+.leaf-detail .label { margin-top: 16px; }
+.leaf-detail .notice + .label { margin-top: 16px; }
+.verdict.unsure { color: var(--ink-2); font-size: 24px; }
+.verdict .icon { align-self: flex-start; margin-top: 4px; }
+@media (min-width: 960px) {
+  .leaf-result { display: grid; grid-template-columns: 280px 1fr; gap: 0 28px; align-items: start; }
+  .leaf-result .leaf-photo.band { aspect-ratio: 1; margin: 0; }
+  .leaf-result > * + * { margin-top: 0; }
+  .leaf-detail > .label:first-child { margin-top: 0; }
+}

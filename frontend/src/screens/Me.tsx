@@ -6,6 +6,7 @@ import { STRINGS, shortDate, clock, useLang, useT } from '../i18n';
 import { adopt, importGuest, signOut, updateProfile } from '../lib/account';
 import { Link, navigate } from '../lib/router';
 import { setState, toast, useStore, type Theme } from '../lib/store';
+import { save } from '../lib/storage';
 import { Icon } from '../ui/Icon';
 import { Notice, Skeleton } from '../ui/parts';
 import { AnswerText } from './Ask';
@@ -33,7 +34,7 @@ export function Me() {
         <section className="card account" aria-labelledby="acct">
           <div className="acct-row">
             <span className="avatar on" aria-hidden="true"><Icon name="user" /></span>
-            <h2 id="acct" className="h2">{t.me.signedInAs(showLogin(me.user.login))}</h2>
+            <div className="acct-who"><h2 id="acct" className="small muted">{t.me.signedIn}</h2><span className="num login">{showLogin(me.user.login)}</span></div>
           </div>
           <button type="button" className="btn secondary" onClick={() => void signOut().then(() => toast(t.me.signOut))}>{t.me.signOut}</button>
         </section>
@@ -189,6 +190,7 @@ function DeleteAccount() {
     setErr(null);
     try {
       await api.deleteMe(pw, lang);
+      save('session', null);
       setState({ me: null, thread: [], importOffer: 0 });
       toast(t.me.deleted);
       navigate('/me', { replace: true });

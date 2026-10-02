@@ -22,7 +22,7 @@ const TABS: { path: string; key: 'ask' | 'leaf' | 'soil' | 'weather' | 'schemes'
   { path: '/schemes', key: 'schemes', icon: 'schemes' },
 ];
 
-interface Route { title: string; screen: ReactNode; tab: string | null; parent?: string }
+interface Route { title: string; doc?: string; screen: ReactNode; tab: string | null; parent?: string }
 
 function useRoute(path: string): Route {
   const t = useT();
@@ -41,7 +41,7 @@ function useRoute(path: string): Route {
     case '/about': return { title: t.titles.about, screen: <About />, tab: null, parent: '/me' };
   }
   const m = /^\/schemes\/([a-z0-9-]+)$/.exec(p);
-  if (m && SCHEME_BY_ID.has(m[1])) return { title: SCHEME_BY_ID.get(m[1])!.short[lang], screen: <SchemeDetail id={m[1]} />, tab: '/schemes', parent: '/schemes' };
+  if (m && SCHEME_BY_ID.has(m[1])) return { title: t.tabs.schemes, doc: SCHEME_BY_ID.get(m[1])!.short[lang], screen: <SchemeDetail id={m[1]} />, tab: '/schemes', parent: '/schemes' };
   return { title: t.titles.notFound, screen: <NotFound />, tab: null };
 }
 
@@ -88,8 +88,8 @@ export function App() {
   }, [lang, theme]);
 
   useEffect(() => {
-    document.title = route.tab === '/' ? `${t.brand}: ${t.titles.ask}` : `${route.title} · ${t.brand}`;
-  }, [route.title, route.tab, t]);
+    document.title = route.tab === "/" ? `${t.brand}: ${t.titles.ask}` : `${route.doc ?? route.title} · ${t.brand}`;
+  }, [route.title, route.doc, route.tab, t]);
 
   useEffect(() => {
     const on = () => setScrolled(window.scrollY > 4);
@@ -118,7 +118,7 @@ export function App() {
         </div>
       </nav>
       <div className="content-col">
-        <header className={`top${scrolled ? ' scrolled' : ''}`}>
+        <header className={`top${scrolled ? ' scrolled' : ''}${route.parent ? ' sub' : ''}`}>
           <div className="top-inner">
             {route.parent && (
               <button type="button" className="icon-btn back" onClick={() => back(route.parent!)} aria-label={t.common.back}>

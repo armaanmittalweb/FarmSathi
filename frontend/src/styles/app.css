@@ -47,6 +47,7 @@ img { max-width: 100%; display: block; }
 .top-inner { display: flex; align-items: center; gap: 10px; width: 100%; max-width: var(--col); margin: 0 auto; }
 .top h1 { font-size: 24px; line-height: 1.2; font-weight: 700; letter-spacing: -0.01em; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .top .back { margin-left: -10px; }
+@media (max-width: 959px) { .top.sub h1 { font-size: 20px; } }
 .top-note { font-size: 15px; color: var(--muted); white-space: nowrap; display: none; }
 
 .langs { display: flex; border: 1.5px solid var(--line-strong); border-radius: 999px; padding: 2px; background: var(--card); }
