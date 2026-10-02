@@ -9,16 +9,17 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { createMiddleware } from 'hono/factory'
 import { accountRoutes } from './accounts'
+import { DEFAULT_CAPS } from './chain'
 import { chatRoutes } from './chat'
 import {
-  allowedOrigins, CHAT_RETENTION_DAYS, clientIp, currentSession, fail, hitLimiter, initialLang, istDay, langOf, peek,
+  allowedOrigins, capOf, CHAT_RETENTION_DAYS, clientIp, currentSession, fail, hitLimiter, initialLang, istDay, langOf, peek,
   type AppEnv, type Deps,
 } from './http'
 import { isLang } from './i18n'
 import { sameString } from './keys'
 import { schemesFor } from './knowledge'
 import type { Sql } from './sql'
-import { voiceRoutes } from './voice'
+import { DEFAULT_STT_CAPS, voiceRoutes } from './voice'
 
 export type { Bindings, Deps } from './http'
 
@@ -98,13 +99,27 @@ export function createApp(deps: Deps) {
   app.get('/internal/stats', async c => {
     const sql = deps.sql(c.env), t = now()
     const [row] = await sql.all<{ users: number; chats: number }>('SELECT (SELECT COUNT(*) FROM users) AS users, (SELECT COUNT(*) FROM chats) AS chats')
-    const answers = await sql.all<{ key: string; n: number }>("SELECT key, n FROM usage WHERE day = ? AND key LIKE 'a:%' ORDER BY key", istDay(t))
+    const counters = await sql.all<{ key: string; n: number }>(
+      "SELECT key, n FROM usage WHERE day = ? AND (key LIKE 'a:%' OR key LIKE 'guard:%' OR key LIKE 'stt:%') ORDER BY key", istDay(t))
+    const under = (prefix: string) => Object.fromEntries(counters.filter(r => r.key.startsWith(prefix)).map(r => [r.key.slice(prefix.length), Number(r.n)]))
+    // Today's cap for each provider that is set up, so the dashboard can draw use against it.
+    const e = c.env, caps: Record<string, number> = {}
+    if (e.GROQ_API_KEY) Object.assign(caps, { groq: capOf(e.GROQ_DAILY_CAP, DEFAULT_CAPS.groq), 'groq-stt': capOf(e.GROQ_STT_DAILY_CAP, DEFAULT_STT_CAPS.groq) })
+    if (e.GEMINI_API_KEY) caps.gemini = capOf(e.GEMINI_DAILY_CAP, DEFAULT_CAPS.gemini)
+    if (e.OPENROUTER_API_KEY) caps.openrouter = capOf(e.OPENROUTER_DAILY_CAP, DEFAULT_CAPS.openrouter)
+    if (deps.ai ? deps.ai(e) : e.AI) {
+      Object.assign(caps, { 'workers-ai': capOf(e.WORKERS_AI_DAILY_CAP, DEFAULT_CAPS['workers-ai']), 'workers-ai-stt': capOf(e.WORKERS_AI_STT_DAILY_CAP, DEFAULT_STT_CAPS['workers-ai']) })
+    }
+    if (e.VOICE_URL && e.VOICE_KEY) caps['indic-stt'] = capOf(e.INDIC_STT_DAILY_CAP, DEFAULT_STT_CAPS.indic)
     return c.json({
       users: Number(row?.users ?? 0),
       chats: Number(row?.chats ?? 0),
       dbBytes: await sql.size(),
       today: { chat: await peek(sql, t, 'all:chat'), transcribe: await peek(sql, t, 'all:transcribe'), speak: await peek(sql, t, 'all:speak') },
-      byProvider: Object.fromEntries(answers.map(a => [a.key.slice(2), Number(a.n)])),
+      byProvider: under('a:'),
+      guard: under('guard:'),
+      stt: under('stt:'),
+      caps,
       lastStepToday: await peek(sql, t, 'last_step'),
     })
   })

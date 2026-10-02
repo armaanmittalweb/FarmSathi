@@ -27,8 +27,20 @@ describe('/internal/*', () => {
       users: 1, chats: 1, dbBytes: 4096,
       today: { chat: 2, transcribe: 0, speak: 0 },
       byProvider: { 'workers-ai': 2 },
+      guard: { nolabel: 2 },
+      stt: {},
+      caps: { 'workers-ai': 300, 'workers-ai-stt': 300 },
       lastStepToday: 4,
     })
+  })
+
+  it('counts refusals and dropped transcripts, and caps only the providers that are set up', async () => {
+    const s = setup({ GROQ_API_KEY: 'gq', VOICE_URL: 'https://voice.example', VOICE_KEY: 'k', INDIC_STT_DAILY_CAP: '50' }, { ai: null })
+    s.sql.db.prepare('INSERT INTO usage (day, key, n) VALUES (?, ?, ?), (?, ?, ?), (?, ?, ?)')
+      .run(istDay(s.clock.t), 'guard:offtopic', 3, istDay(s.clock.t), 'stt:unusable', 2, istDay(s.clock.t) - 1, 'guard:output', 9)
+    const res = await s.call('GET', '/internal/stats', { headers: KEY })
+    expect(res.json).toMatchObject({ guard: { offtopic: 3 }, stt: { unusable: 2 }, caps: { groq: 900, 'groq-stt': 1800, 'indic-stt': 50 } })
+    expect(Object.keys(res.json.caps).sort()).toEqual(['groq', 'groq-stt', 'indic-stt'])
   })
 
   it('prunes chats older than 180 days, expired sessions and week-old counters', async () => {
