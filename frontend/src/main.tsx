@@ -4,6 +4,7 @@ import './styles/fonts.css';
 import './styles/tokens.css';
 import './styles/app.css';
 import './styles/screens.css';
+import './styles/landing.css';
 import { App } from './App';
 import { apiReady } from './api';
 import { countViews } from './beacon';

@@ -57,7 +57,7 @@ export function SchemeDetail({ id }: { id: string }) {
   const t = useT();
   const lang = useLang();
   const s = SCHEME_BY_ID.get(id) ?? SCHEMES[0];
-  const ask = () => { setState({ draft: t.schemes.askPrefill(s.short[lang]) }); navigate('/'); };
+  const ask = () => { setState({ draft: t.schemes.askPrefill(s.short[lang]) }); navigate('/ask'); };
   return (
     <article className="screen scheme">
       <header className="scheme-top">

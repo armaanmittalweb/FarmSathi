@@ -10,6 +10,7 @@ const pa: Strings = {
 
   tabs: { ask: 'ਪੁੱਛੋ', leaf: 'ਪੱਤਾ', soil: 'ਮਿੱਟੀ', weather: 'ਮੌਸਮ', schemes: 'ਸਕੀਮਾਂ' },
   titles: {
+    home: 'ਖੇਤੀ ਦੇ ਸਵਾਲਾਂ ਦੇ ਜਵਾਬ, ਤੁਹਾਡੀ ਭਾਸ਼ਾ ਵਿੱਚ',
     ask: 'ਪੁੱਛੋ',
     leaf: 'ਪੱਤੇ ਦੀ ਜਾਂਚ',
     soil: 'ਮਿੱਟੀ ਤੇ ਫ਼ਸਲ',

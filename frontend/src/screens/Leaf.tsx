@@ -145,7 +145,7 @@ function Result({ preview, result }: { preview: string; result: LeafResult }) {
   const crop = cropName(c.crop, lang);
   const ask = () => {
     setState({ draft: t.leaf.askPrefill(cropShort(c.crop, lang), c.name[lang]) });
-    navigate('/');
+    navigate('/ask');
   };
 
   return (

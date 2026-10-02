@@ -57,20 +57,24 @@ const GUEST = [
 
 // [name, langs ('base' = en+hi, 'all' = en+hi+pa), run(page, shot, lang)]
 const scenarios = [
+  ['landing', 'all', async (p, shot, L) => {
+    await p.goto(`${BASE}/?lang=${L}`); await p.waitForSelector('.hero'); await shot('landing'); await shot('landing-full', { full: true });
+    await p.click('.faq-list summary >> nth=0'); await p.locator('.faq').scrollIntoViewIfNeeded(); await wait(p); await shot('landing-faq');
+  }],
   ['ask', 'all', async (p, shot, L) => {
-    await p.goto(`${BASE}/?lang=${L}&fast=1`); await p.waitForSelector('.first-run'); await shot('ask-first-run');
+    await p.goto(`${BASE}/ask?lang=${L}&fast=1`); await p.waitForSelector('.first-run'); await shot('ask-first-run');
     await p.click('.example >> nth=0'); await p.waitForSelector('.a-card .a-foot'); await wait(p); await shot('ask-answer');
   }],
   ['ask-states', 'base', async (p, shot, L) => {
-    await p.goto(`${BASE}/?lang=${L}&mic=fake`); await p.waitForSelector('.first-run');
+    await p.goto(`${BASE}/ask?lang=${L}&mic=fake`); await p.waitForSelector('.first-run');
     await p.click('button.mic'); await p.waitForSelector('.composer.listening'); await wait(p, 1200); await shot('ask-listening');
     await p.click('.listen-actions .btn.primary'); await p.waitForSelector('.composer.busy'); await shot('ask-transcribing');
-    await p.goto(`${BASE}/?lang=${L}&chat=slow`); await p.waitForSelector('.first-run'); await p.click('.example >> nth=0'); await p.waitForSelector('.a-card[aria-busy=true]'); await wait(p); await shot('ask-thinking');
-    await p.goto(`${BASE}/?lang=${L}&chat=limit&fast=1`); await p.waitForSelector('.first-run'); await p.click('.example >> nth=1'); await p.waitForSelector('.notice.warn'); await wait(p); await shot('ask-daily-limit');
-    await p.goto(`${BASE}/?lang=${L}&chat=error&fast=1`); await p.waitForSelector('.first-run'); await p.click('.example >> nth=2'); await p.waitForSelector('.notice.error'); await wait(p); await shot('ask-error');
-    await p.goto(`${BASE}/?lang=${L}&mic=denied`); await p.waitForSelector('.first-run'); await p.click('button.mic'); await p.waitForSelector('.notice'); await wait(p); await shot('ask-mic-denied');
-    await p.goto(`${BASE}/?lang=${L}&offline=1`, { waitUntil: 'load' }); await p.waitForSelector('.first-run'); await wait(p); await shot('ask-offline');
-    await p.goto(`${BASE}/?lang=${L}&voice=asleep&fast=1`); await p.waitForSelector('.first-run'); await p.click('.example >> nth=0'); await p.waitForSelector('.listen-btn');
+    await p.goto(`${BASE}/ask?lang=${L}&chat=slow`); await p.waitForSelector('.first-run'); await p.click('.example >> nth=0'); await p.waitForSelector('.a-card[aria-busy=true]'); await wait(p); await shot('ask-thinking');
+    await p.goto(`${BASE}/ask?lang=${L}&chat=limit&fast=1`); await p.waitForSelector('.first-run'); await p.click('.example >> nth=1'); await p.waitForSelector('.notice.warn'); await wait(p); await shot('ask-daily-limit');
+    await p.goto(`${BASE}/ask?lang=${L}&chat=error&fast=1`); await p.waitForSelector('.first-run'); await p.click('.example >> nth=2'); await p.waitForSelector('.notice.error'); await wait(p); await shot('ask-error');
+    await p.goto(`${BASE}/ask?lang=${L}&mic=denied`); await p.waitForSelector('.first-run'); await p.click('button.mic'); await p.waitForSelector('.notice'); await wait(p); await shot('ask-mic-denied');
+    await p.goto(`${BASE}/ask?lang=${L}&offline=1`, { waitUntil: 'load' }); await p.waitForSelector('.first-run'); await wait(p); await shot('ask-offline');
+    await p.goto(`${BASE}/ask?lang=${L}&voice=asleep&fast=1`); await p.waitForSelector('.first-run'); await p.click('.example >> nth=0'); await p.waitForSelector('.listen-btn');
     await p.click('.listen-btn'); await p.waitForSelector('.voice-used'); await wait(p, 400); await shot('ask-listen-fallback');
   }, { guest: true }],
   ['leaf', 'base', async (p, shot, L) => {
@@ -148,7 +152,7 @@ const scenarios = [
     await p.click('.row-link >> nth=1'); await p.waitForSelector('.chats'); await wait(p, 600); await shot('chats-signed-in');
   }, { guest: true }],
   ['me-signed-in', 'base', async (p, shot, L) => {
-    await p.goto(`${BASE}/me?lang=${L}&seed=signedin`); await p.waitForSelector('.account .h2'); await wait(p, 300); await shot('me-signed-in'); await shot('me-signed-in-full', { full: true });
+    await p.goto(`${BASE}/me?lang=${L}&seed=signedin`); await p.waitForSelector('.account #acct'); await wait(p, 300); await shot('me-signed-in'); await shot('me-signed-in-full', { full: true });
     await p.click('.danger-text'); await p.waitForSelector('.danger-zone'); await shot('me-delete');
   }],
   ['chats', 'base', async (p, shot, L) => {
@@ -156,7 +160,7 @@ const scenarios = [
   }],
   ['chats-guest', 'base', async (p, shot, L) => {
     await p.goto(`${BASE}/me/chats?lang=${L}`); await p.waitForSelector('.chat-list'); await p.click('.chat-item summary >> nth=0'); await wait(p, 200); await shot('chats-guest');
-    await p.goto(`${BASE}/?lang=${L}`); await p.waitForSelector('.first-run'); await shot('ask-with-history');
+    await p.goto(`${BASE}/ask?lang=${L}`); await p.waitForSelector('.first-run'); await shot('ask-with-history');
   }, { guest: true }],
   ['about', 'base', async (p, shot, L) => {
     await p.goto(`${BASE}/about?lang=${L}`); await p.waitForSelector('.about'); await shot('about'); await shot('about-full', { full: true });

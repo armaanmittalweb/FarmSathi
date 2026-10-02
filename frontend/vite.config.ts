@@ -109,7 +109,7 @@ function modelAssets(): Plugin {
       }
       const shell = walk(dist)
         .map((f) => '/' + relative(dist, f).replace(/\\/g, '/'))
-        .filter((u) => !u.startsWith('/models/') && !u.startsWith('/licenses/') && !u.startsWith('/.vite/') && u !== '/sw.js' && u !== '/og.png' && !/\/assets\/(mock|ort|infer)[-.]/.test(u) && !u.endsWith('.map'))
+        .filter((u) => !u.startsWith('/models/') && !u.startsWith('/licenses/') && !u.startsWith('/landing/') && !u.startsWith('/.vite/') && u !== '/sw.js' && u !== '/og.png' && !/\/assets\/(mock|ort|infer)[-.]/.test(u) && !u.endsWith('.map'))
         .sort();
       const version = createHash('sha256').update(shell.join('\n')).update(readFileSync(join(dist, 'index.html'))).digest('hex').slice(0, 10);
       writeFileSync(join(dist, 'sw.js'), SW(version, shell));

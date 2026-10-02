@@ -3,12 +3,12 @@
   "short_name": "FarmSaathi",
   "description": "Ask about your crops in Hindi, Punjabi or English. Leaf checks, crop advice, weather and schemes.",
   "id": "/",
-  "start_url": "/",
+  "start_url": "/ask",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f5f6f1",
-  "theme_color": "#2b6a3c",
+  "background_color": "#fbf9f5",
+  "theme_color": "#517531",
   "lang": "en-IN",
   "categories": ["productivity", "utilities", "weather"],
   "icons": [
@@ -17,6 +17,7 @@
     { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
+    { "name": "Ask a question", "short_name": "Ask", "url": "/ask", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Check a leaf", "short_name": "Leaf", "url": "/leaf", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Weather", "url": "/weather", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Schemes", "url": "/schemes", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }

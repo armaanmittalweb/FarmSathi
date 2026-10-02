@@ -8,7 +8,7 @@ export function NotFound() {
     <div className="screen not-found">
       <p className="nf-code num" aria-hidden="true">404</p>
       <p className="lede">{t.notFound.body}</p>
-      <Link to="/" className="btn primary"><Icon name="ask" />{t.notFound.home}</Link>
+      <Link to="/ask" className="btn primary"><Icon name="ask" />{t.notFound.home}</Link>
     </div>
   );
 }

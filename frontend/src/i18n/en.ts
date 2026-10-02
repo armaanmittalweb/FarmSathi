@@ -8,6 +8,7 @@ const en = {
 
   tabs: { ask: 'Ask', leaf: 'Leaf', soil: 'Soil', weather: 'Weather', schemes: 'Schemes' },
   titles: {
+    home: 'farming answers in your own language',
     ask: 'Ask',
     leaf: 'Leaf check',
     soil: 'Soil and crops',

@@ -76,7 +76,7 @@
 .composer.busy { grid-template-columns: auto 1fr; align-items: center; min-height: 88px; font-weight: 600; color: var(--ink-2); }
 @media (min-width: 960px) {
   .composer { bottom: 0; margin: 0; padding: 14px 0 18px; }
-  .ask { min-height: calc(100dvh - 76px); }
+  .ask { min-height: calc(100dvh - var(--top-h)); }
 }
 
 /* ---------- Leaf ---------- */

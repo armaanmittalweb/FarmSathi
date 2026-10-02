@@ -1,97 +1,139 @@
-/* FarmSaathi tokens. One field green for actions, turmeric for warnings, deep ink, warm paper.
-   Dark is its own palette, not an inversion. Body text is >= 7:1 against its surface in both. */
+/* FarmSaathi tokens. Moss for actions, clay for the few moments that should pop, warm sand for every
+   neutral (never stark white or cold grey), shadows tinted toward the sand instead of black.
+   Dark is its own warm palette, not an inversion. Body text is >= 4.5:1 against its surface in both. */
 :root {
-  --paper: #f5f6f1;
+  --paper: #fbf9f5;
   --card: #ffffff;
-  --sunk: #eceee6;
-  --ink: #18221b;
-  --ink-2: #2f3c35;
-  --muted: #4a564f;
-  --line: #d3d9cf;
-  --line-strong: #b4bdb1;
-  --field: #2b6a3c;
-  --field-hover: #22562f;
+  --sunk: #f6f3ec;
+  --ink: #29241c;
+  --ink-2: #3c352a;
+  --muted: #6e624a;
+  --line: #eee9dd;
+  --line-strong: #c7ba9e;
+  --field: #517531;
+  --field-hover: #405d28;
   --field-ink: #ffffff;
-  --field-soft: #e3efe1;
-  --field-text: #23592f;
-  --turmeric: #9a6400;
-  --turmeric-soft: #f7ecd4;
-  --turmeric-text: #6b4600;
-  --danger: #a8321f;
-  --danger-soft: #f8e4df;
-  --focus: #1f5fbf;
-  --bubble-me: #2b6a3c;
+  --field-soft: #f3f7ee;
+  --field-text: #405d28;
+  --clay: #b15f27;
+  --clay-soft: #fbf2ec;
+  --clay-text: #8e4b1f;
+  --turmeric: #b4802a;
+  --turmeric-soft: #f8eedb;
+  --turmeric-text: #7a5418;
+  --danger: #b8433a;
+  --danger-soft: #f8e6e3;
+  --focus: #67923f;
+  --bubble-me: #517531;
   --bubble-me-ink: #ffffff;
-  --meter: #2b6a3c;
-  --shadow: 0 1px 0 rgb(24 34 27 / 0.06);
+  --meter: #67923f;
+  --shadow: 0 1px 2px rgb(41 36 28 / 0.06), 0 4px 16px rgb(41 36 28 / 0.07);
+  --lift: 0 2px 4px rgb(41 36 28 / 0.08), 0 12px 24px rgb(41 36 28 / 0.1);
 
-  --radius: 12px;
-  --radius-sm: 8px;
+  /* the illustration and the logo mark */
+  --moss-200: #c8dcb0;
+  --moss-300: #a7c684;
+  --moss-400: #86ac5e;
+  --moss-500: #67923f;
+  --moss-600: #517531;
+  --moss-700: #405d28;
+  --clay-200: #e7b896;
+  --clay-300: #d89361;
+  --sand-100: #eee9dd;
+
+  --radius: 20px;
+  --radius-sm: 14px;
   --tab-h: 68px;
-  --top-h: 60px;
-  --rail-w: 248px;
+  --top-h: 64px;
   --col: 720px;
+  --wide: 1120px;
   --gutter: 16px;
 
-  --f-ui: 'Mukta', 'Noto Sans Gurmukhi', system-ui, sans-serif;
-  --f-pa: 'Noto Sans Gurmukhi', 'Mukta', sans-serif;
-  --f-num: 'IBM Plex Mono', ui-monospace, monospace;
+  --f-ui: 'Manrope', 'Noto Sans Devanagari', 'Noto Sans Gurmukhi', system-ui, sans-serif;
+  --f-pa: 'Noto Sans Gurmukhi', 'Manrope', sans-serif;
+  --f-num: 'Manrope', 'Noto Sans Devanagari', system-ui, sans-serif;
 
   color-scheme: light;
 }
 
 :root[data-theme='dark'] {
-  --paper: #111611;
-  --card: #182019;
-  --sunk: #0c100c;
-  --ink: #e6ece6;
-  --ink-2: #c9d3cb;
-  --muted: #a3b0a7;
-  --line: #2c372e;
-  --line-strong: #435045;
-  --field: #8fd09f;
-  --field-hover: #a6dcb3;
-  --field-ink: #0f1a12;
-  --field-soft: #1d3324;
-  --field-text: #9fdbae;
-  --turmeric: #e9b64e;
-  --turmeric-soft: #372b13;
-  --turmeric-text: #f1cc7e;
-  --danger: #f08a73;
-  --danger-soft: #3a1d16;
-  --focus: #8fb4f5;
-  --bubble-me: #24442d;
-  --bubble-me-ink: #eef6ef;
-  --meter: #8fd09f;
+  --paper: #191712;
+  --card: #221f18;
+  --sunk: #12100c;
+  --ink: #f2ede2;
+  --ink-2: #dad2c2;
+  --muted: #ada28b;
+  --line: #37312a;
+  --line-strong: #5a5143;
+  --field: #a7c684;
+  --field-hover: #bcd69e;
+  --field-ink: #1b2612;
+  --field-soft: #26321c;
+  --field-text: #b6d396;
+  --clay: #e0915a;
+  --clay-soft: #3a2619;
+  --clay-text: #eaa978;
+  --turmeric: #e2b25a;
+  --turmeric-soft: #3a2e17;
+  --turmeric-text: #f0cf8a;
+  --danger: #ee8a7e;
+  --danger-soft: #3d1e1a;
+  --focus: #a7c684;
+  --bubble-me: #34472a;
+  --bubble-me-ink: #f1f6ea;
+  --meter: #a7c684;
   --shadow: none;
+  --lift: 0 12px 24px rgb(0 0 0 / 0.35);
+  --moss-200: #4f6a38;
+  --moss-300: #5f7f44;
+  --moss-400: #789b56;
+  --moss-500: #93b86c;
+  --moss-600: #a7c684;
+  --moss-700: #c8dcb0;
+  --clay-200: #8a5a37;
+  --clay-300: #b0724a;
+  --sand-100: #2b271f;
   color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --paper: #111611;
-    --card: #182019;
-    --sunk: #0c100c;
-    --ink: #e6ece6;
-    --ink-2: #c9d3cb;
-    --muted: #a3b0a7;
-    --line: #2c372e;
-    --line-strong: #435045;
-    --field: #8fd09f;
-    --field-hover: #a6dcb3;
-    --field-ink: #0f1a12;
-    --field-soft: #1d3324;
-    --field-text: #9fdbae;
-    --turmeric: #e9b64e;
-    --turmeric-soft: #372b13;
-    --turmeric-text: #f1cc7e;
-    --danger: #f08a73;
-    --danger-soft: #3a1d16;
-    --focus: #8fb4f5;
-    --bubble-me: #24442d;
-    --bubble-me-ink: #eef6ef;
-    --meter: #8fd09f;
+    --paper: #191712;
+    --card: #221f18;
+    --sunk: #12100c;
+    --ink: #f2ede2;
+    --ink-2: #dad2c2;
+    --muted: #ada28b;
+    --line: #37312a;
+    --line-strong: #5a5143;
+    --field: #a7c684;
+    --field-hover: #bcd69e;
+    --field-ink: #1b2612;
+    --field-soft: #26321c;
+    --field-text: #b6d396;
+    --clay: #e0915a;
+    --clay-soft: #3a2619;
+    --clay-text: #eaa978;
+    --turmeric: #e2b25a;
+    --turmeric-soft: #3a2e17;
+    --turmeric-text: #f0cf8a;
+    --danger: #ee8a7e;
+    --danger-soft: #3d1e1a;
+    --focus: #a7c684;
+    --bubble-me: #34472a;
+    --bubble-me-ink: #f1f6ea;
+    --meter: #a7c684;
     --shadow: none;
+    --lift: 0 12px 24px rgb(0 0 0 / 0.35);
+    --moss-200: #4f6a38;
+    --moss-300: #5f7f44;
+    --moss-400: #789b56;
+    --moss-500: #93b86c;
+    --moss-600: #a7c684;
+    --moss-700: #c8dcb0;
+    --clay-200: #8a5a37;
+    --clay-300: #b0724a;
+    --sand-100: #2b271f;
     color-scheme: dark;
   }
 }

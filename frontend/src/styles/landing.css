@@ -1,0 +1,101 @@
+/* ---------- Landing ---------- */
+.land { padding-bottom: 8px; }
+.wrap { width: 100%; max-width: var(--wide); margin: 0 auto; padding: 0 var(--gutter); }
+.land h1, .land h2, .land h3 { text-wrap: balance; }
+.land section[id], .land article[id] { scroll-margin-top: calc(var(--top-h) + 12px); }
+
+.hero { display: grid; gap: 28px; align-items: center; padding-top: 32px; padding-bottom: 40px; }
+.eyebrow {
+  display: inline-block; padding: 5px 14px; border-radius: 999px; background: var(--field-soft); color: var(--field-text);
+  font-size: 13.5px; font-weight: 700; letter-spacing: 0.04em; line-height: 1.4;
+}
+:lang(en) .eyebrow { text-transform: uppercase; }
+.hero h1 { margin-top: 16px; font-size: clamp(34px, 8.6vw, 54px); line-height: 1.1; font-weight: 800; letter-spacing: -0.03em; }
+:lang(hi) .hero h1, :lang(pa) .hero h1 { line-height: 1.3; letter-spacing: -0.01em; }
+.hero-lede { margin-top: 16px; max-width: 34em; font-size: 18.5px; line-height: 1.6; color: var(--ink-2); }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.hero-actions .btn { min-height: 56px; }
+.facts { list-style: none; display: grid; gap: 8px; margin-top: 24px; color: var(--ink-2); font-size: 16px; font-weight: 600; }
+.facts li { display: flex; gap: 10px; align-items: flex-start; line-height: 1.4; }
+.facts .icon { color: var(--field-text); flex: none; margin-top: 1px; }
+.hero-art { width: 100%; max-width: 240px; justify-self: center; }
+
+@media (max-width: 559px) {
+  .hero { padding-top: 24px; gap: 8px; }
+  .hero-actions .btn { flex: 1 1 100%; }
+  .hero-art { max-width: 200px; margin-top: 20px; }
+}
+@media (min-width: 900px) {
+  .hero { grid-template-columns: 1.15fr 0.85fr; gap: 56px; padding-top: 64px; padding-bottom: 72px; }
+  .hero-art { max-width: 440px; }
+}
+
+.sec-title { font-size: clamp(24px, 5.4vw, 32px); line-height: 1.2; font-weight: 800; letter-spacing: -0.02em; }
+.sec-lede { margin-top: 8px; color: var(--ink-2); max-width: 40em; }
+
+/* the five tools, as in the old feature grid; each one jumps to its how-to */
+.tools-sec { padding-top: 8px; padding-bottom: 48px; }
+.tool-grid { list-style: none; display: grid; gap: 12px; margin-top: 20px; }
+@media (min-width: 600px) { .tool-grid { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 960px) { .tool-grid { grid-template-columns: repeat(3, 1fr); } }
+.tool-card {
+  display: flex; gap: 14px; align-items: flex-start; height: 100%; padding: 18px; border-radius: var(--radius);
+  background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow); color: var(--ink); text-decoration: none;
+  transition: border-color 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+.tool-card:hover { border-color: var(--moss-300); box-shadow: var(--lift); }
+.tool-ico { flex: none; width: 44px; height: 44px; border-radius: var(--radius-sm); display: grid; place-items: center; }
+.tool-ico.moss { background: var(--field-soft); color: var(--field-text); }
+.tool-ico.clay { background: var(--clay-soft); color: var(--clay-text); }
+.tool-ico.sm { width: 34px; height: 34px; border-radius: 10px; }
+.tool-words { display: grid; gap: 2px; line-height: 1.4; }
+.tool-words b { font-size: 18px; }
+.tool-words span { color: var(--ink-2); font-size: 16px; }
+
+/* how to use: steps beside a real phone screenshot */
+.how { padding: 48px 0 24px; background: var(--sunk); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.how-head { padding-bottom: 8px; }
+.how-row { display: grid; gap: 24px; padding-top: 36px; padding-bottom: 36px; }
+.how-row + .how-row { border-top: 1px solid var(--line); }
+.how-text { display: grid; gap: 16px; align-content: start; justify-items: start; }
+.how-kicker { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink-2); }
+.how-text h3 { font-size: clamp(22px, 4.6vw, 28px); line-height: 1.25; font-weight: 800; letter-spacing: -0.015em; }
+.how-text .steps { width: 100%; }
+.how-text .steps li { font-size: 17px; line-height: 1.5; }
+.tip { padding: 14px 16px; border-radius: var(--radius-sm); background: var(--card); border: 1px solid var(--line); color: var(--ink-2); font-size: 16px; line-height: 1.5; }
+.tip b { color: var(--clay-text); margin-right: 4px; }
+.shot { margin: 0; justify-self: center; width: min(100%, 300px); }
+.shot img { width: 100%; height: auto; border-radius: 28px; border: 1px solid var(--line-strong); box-shadow: var(--lift); background: var(--card); }
+@media (min-width: 860px) {
+  .how-row { grid-template-columns: 1fr 300px; gap: 64px; align-items: center; padding-top: 56px; padding-bottom: 56px; }
+  .how-row.flip { grid-template-columns: 300px 1fr; }
+  .how-row.flip .shot { order: -1; }
+}
+
+/* install and good-to-know */
+.install { padding-top: 48px; padding-bottom: 24px; }
+.install-grid { display: grid; gap: 12px; margin-top: 20px; }
+@media (min-width: 700px) { .install-grid { grid-template-columns: 1fr 1fr; } }
+.install-grid .steps { margin-top: 14px; }
+.install-grid .steps li { font-size: 17px; }
+
+.faq { padding-top: 32px; padding-bottom: 48px; }
+.faq-list { margin-top: 20px; }
+.faq-list details + details { border-top: 1px solid var(--line); }
+.faq-list summary {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 64px; padding: 12px 20px;
+  cursor: pointer; list-style: none; font-weight: 700; font-size: 18px; line-height: 1.35;
+}
+.faq-list summary::-webkit-details-marker { display: none; }
+.faq-list summary .icon { color: var(--field-text); transition: transform 0.15s ease-out; }
+.faq-list details[open] summary .icon { transform: rotate(45deg); }
+.faq-list summary:hover { background: var(--sunk); }
+.faq-list details p { padding: 0 20px 18px; color: var(--ink-2); max-width: 46em; }
+
+.land-foot { display: grid; gap: 14px; padding-top: 28px; padding-bottom: 28px; border-top: 1px solid var(--line); }
+.land-brand { display: grid; gap: 2px; }
+.land-brand b { font-size: 18px; font-weight: 800; }
+.land-brand span { color: var(--muted); font-size: 15px; }
+.foot-links { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.foot-links a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
+@media (min-width: 760px) { .land-foot { grid-template-columns: 1fr auto; align-items: center; } }

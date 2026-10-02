@@ -53,7 +53,7 @@ export function Me() {
 
       <Farm />
 
-      <section className="card flush rows" aria-label={t.me.settings}>
+      <section className="card flush rows">
         <Link to="/weather" className="row-link">
           <Icon name="pin" />
           <span><b>{t.me.village}</b><span className="small muted">{place ? (place.gps ? t.weather.nearYou : [place.name, place.region].filter(Boolean).join(', ')) : t.me.noVillage}</span></span>
@@ -329,7 +329,7 @@ export function Chats() {
         <div className="empty">
           <Icon name="chat" size={32} />
           <p>{t.me.noChats}</p>
-          <Link to="/" className="btn primary">{t.tabs.ask}</Link>
+          <Link to="/ask" className="btn primary">{t.tabs.ask}</Link>
         </div>
       )}
       {list && list.length > 0 && (

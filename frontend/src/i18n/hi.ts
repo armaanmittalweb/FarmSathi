@@ -10,6 +10,7 @@ const hi: Strings = {
 
   tabs: { ask: 'पूछिए', leaf: 'पत्ता', soil: 'मिट्टी', weather: 'मौसम', schemes: 'योजनाएँ' },
   titles: {
+    home: 'खेती के सवालों के जवाब, आपकी भाषा में',
     ask: 'पूछिए',
     leaf: 'पत्ते की जाँच',
     soil: 'मिट्टी और फ़सल',
