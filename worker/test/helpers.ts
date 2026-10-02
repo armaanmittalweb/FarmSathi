@@ -107,6 +107,8 @@ export function fakeFetch(answers: Record<string, Answer> = {}) {
       for (const [k, v] of init.body.entries()) entries[k] = typeof v === 'string' ? v : { name: (v as File).name, size: (v as File).size, type: (v as File).type }
       body = entries
       raw = JSON.stringify(entries)
+    } else if (init?.body instanceof Uint8Array) {
+      body = init.body
     }
     const captured = { url, host, headers: new Headers(init?.headers), body, raw }
     calls.push(captured)

@@ -301,7 +301,10 @@ function Composer({ notice, showHint, text, setText, inputRef, phase, setPhase, 
       setPhase('transcribing');
       const { text: said } = await api.transcribe(blob, lang);
       setPhase('idle');
-      if (said.trim()) onHeard(said.trim());
+      const q = said.trim();
+      // A long spoken question goes into the box to shorten, instead of an error about its length.
+      if (q.length > 1000) { setText(q.slice(0, 1000)); requestAnimationFrame(() => inputRef.current?.focus()); }
+      else if (q) onHeard(q);
       else onProblem({ kind: 'heard' });
     } catch (e) {
       rec.current = null;

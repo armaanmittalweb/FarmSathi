@@ -65,11 +65,17 @@ from `ALLOWED_ORIGINS` and `Content-Type: application/json` (`multipart/form-dat
    requested script, plain text that reads well aloud, never invent scheme amounts or dates that are
    not in the passages, and send risky questions (pesticide doses, livestock illness) to the nearest
    KVK or agriculture officer.
-3. **Speech.** Transcription tries Groq `whisper-large-v3-turbo`, then Workers AI
-   `@cf/openai/whisper-large-v3-turbo`. Read-aloud calls the voice Space ([`../voice-space`](../voice-space)),
-   caches each clip for 30 days in the Cache API under SHA-256(lang + text), and answers 503
-   `{fallback: 'device'}` when the Space is asleep, busy, slow (25 s) or failing, so the phone reads
-   the answer with its own voice.
+3. **Speech.** Hindi and Punjabi recordings go first to AI4Bharat's IndicConformer on the voice
+   container ([`../voice-space`](../voice-space), `POST /transcribe`), then Groq
+   `whisper-large-v3-turbo`, then Workers AI `@cf/openai/whisper-large-v3-turbo`; English starts at
+   Groq. On FLEURS Punjabi, Whisper large-v3-turbo got 43% of characters wrong and IndicConformer 8%
+   (Hindi: 16% against 11%). Whisper can also repeat a phrase until the transcript passes the
+   1,000-character question limit, so a transcript that loops (the same word or phrase five times
+   in a row) or runs over the limit is never passed on: the next step is tried, and if none hears
+   it cleanly the app gets `{text: ''}` and asks the farmer to speak again (`stt:unusable` counts
+   these). Read-aloud calls the same container, caches each clip for 30 days in the Cache API
+   under SHA-256(lang + text), and answers 503 `{fallback: 'device'}` when the container is asleep,
+   busy, slow (25 s) or failing, so the phone reads the answer with its own voice.
 
 **Limits.** Per visitor per India day: 30 questions, 30 transcriptions, 60 new clips (cached clips
 are free). The visitor key is SHA-256 of the day, the IP and the account (or `guest`), so no IP is
@@ -103,7 +109,8 @@ Pesticide exposure and injuries at work are in scope: the answer starts with "ge
   passages, and the profile's crops, state and farm size. Never a name, phone number, email,
   district, location or account id; `test/chat.test.ts` checks every captured provider request for
   them.
-- Transcription sends the recording itself (and the language) and nothing else.
+- Transcription sends the recording itself (and the language) and nothing else, to the voice
+  container for Hindi and Punjabi and to Whisper only when that fails.
 - Saved chats exist only for farmers who sign in; a guest's history stays on the phone until they
   choose to import it. Chats are deleted after 180 days, and all of an account's data when it is deleted.
 - Usage counters hold hashes that change daily, not IPs. Logs carry no question text.

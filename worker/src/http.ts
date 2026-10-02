@@ -54,6 +54,7 @@ export interface Bindings {
   GEMINI_DAILY_CAP?: string
   OPENROUTER_DAILY_CAP?: string
   WORKERS_AI_DAILY_CAP?: string
+  INDIC_STT_DAILY_CAP?: string
   GROQ_STT_DAILY_CAP?: string
   WORKERS_AI_STT_DAILY_CAP?: string
   /** PBKDF2 rounds for new password hashes (default and maximum 100,000). */

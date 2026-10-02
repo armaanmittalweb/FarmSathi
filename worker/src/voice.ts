@@ -1,8 +1,16 @@
 /**
- * Voice: speech to text (Groq Whisper, then Workers AI Whisper), text to speech (the Hugging Face
- * Space, cached 30 days in the Cache API; 503 with fallback 'device' when the Space is asleep,
- * busy or failing, so the app uses the phone's own voice) and the wake-up call.
+ * Voice: speech to text, text to speech and the wake-up call.
+ *
+ * Speech to text: Hindi and Punjabi go to AI4Bharat's IndicConformer on the voice container first
+ * (Whisper garbles Punjabi and can repeat a phrase until the text runs past the question limit),
+ * then Groq Whisper, then Workers AI Whisper. English starts at Groq. A transcript that loops is
+ * never passed on: the next step is tried, and if none hears it cleanly the app gets empty text and
+ * asks the farmer to speak again.
+ *
+ * Text to speech: the voice container (MMS-TTS), cached 30 days in the Cache API; 503 with fallback
+ * 'device' when it is asleep, busy or failing, so the app uses the phone's own voice.
  */
+import { MAX_QUESTION } from './accounts'
 import { withTimeout } from './chain'
 import type { Lang } from './contract'
 import {
@@ -18,7 +26,25 @@ export const SPEAK_CACHE_SECONDS = 30 * 86_400
 export const VOICE_TIMEOUT_MS = 25_000
 export const WAKE_TIMEOUT_MS = 25_000
 export const DEFAULT_STT_MODELS = { groq: 'whisper-large-v3-turbo', 'workers-ai': '@cf/openai/whisper-large-v3-turbo' }
-export const DEFAULT_STT_CAPS = { groq: 1800, 'workers-ai': 300 }
+export const DEFAULT_STT_CAPS = { indic: 2000, groq: 1800, 'workers-ai': 300 }
+/** The languages the voice container's IndicConformer models hear. */
+export const INDIC_STT: readonly Lang[] = ['hi', 'pa']
+
+/** True when a transcript can't be a question: longer than the question limit, or the same word or
+ *  phrase (up to 8 words) five or more times in a row, which is Whisper stuck in a loop. */
+export function unusable(text: string): boolean {
+  if (text.length > MAX_QUESTION) return true
+  const w = text.toLowerCase().split(/[\s,.;:!?।]+/u).filter(Boolean)
+  const same = (a: number, b: number, n: number) => { for (let j = 0; j < n; j++) if (w[a + j] !== w[b + j]) return false; return true }
+  for (let n = 1; n <= 8; n++) {
+    for (let i = 0; i + 5 * n <= w.length; i++) {
+      let k = 1
+      while (i + (k + 1) * n <= w.length && same(i, i + k * n, n)) k++
+      if (k >= 5) return true
+    }
+  }
+  return false
+}
 
 /** The recorder formats the app may send (MediaRecorder on Android Chrome, iOS Safari, or WAV). */
 const AUDIO_TYPES: Record<string, string> = {
@@ -67,52 +93,69 @@ export function voiceRoutes(app: App, deps: Deps) {
     if (!(await takeVisitor(c, sql, t, 'transcribe'))) return fail(c, 429, 'rate_limited', 'transcribe_limit', { retryAfter: secondsToNextDay(t) })
 
     const bytes = new Uint8Array(await audio.arrayBuffer())
-    let tried = 0, capped = 0
-    // 1. Groq Whisper
-    if (c.env.GROQ_API_KEY) {
-      if (await takeProvider(sql, t, 'groq-stt', capOf(c.env.GROQ_STT_DAILY_CAP, DEFAULT_STT_CAPS.groq))) {
-        tried++
-        try {
-          const text = await withTimeout(stepMs, async signal => {
-            const body = new FormData()
-            body.set('file', new Blob([bytes], { type: audio.type }), `audio.${ext}`)
-            body.set('model', c.env.GROQ_STT_MODEL || DEFAULT_STT_MODELS.groq)
-            body.set('language', lang)
-            body.set('response_format', 'json')
-            body.set('temperature', '0')
-            const res = await fetcher('https://api.groq.com/openai/v1/audio/transcriptions', {
-              method: 'POST', signal, headers: { authorization: `Bearer ${c.env.GROQ_API_KEY}` }, body,
-            })
-            if (!res.ok) throw new Error(`groq stt ${res.status}`)
-            return textOf(await res.json())
-          })
-          if (text !== null) {
-            await bump(sql, t, 'a:groq-stt')
-            return c.json({ text, lang })
-          }
-        } catch (e) {
-          console.warn('stt step failed', 'groq', String(e))
+    const base = c.env.VOICE_URL?.replace(/\/+$/, ''), voiceKey = c.env.VOICE_KEY
+    let tried = 0, capped = 0, unclear = 0
+
+    /** One provider: null to move on to the next, or the response to send. */
+    const step = async (provider: string, cap: number, ms: number, hear: (signal: AbortSignal) => Promise<string | null>) => {
+      if (!(await takeProvider(sql, t, provider, cap))) { capped++; return null }
+      tried++
+      try {
+        const text = await withTimeout(ms, hear)
+        if (text === null) return null
+        if (unusable(text)) {
+          unclear++
+          await bump(sql, t, 'stt:unusable')
+          console.warn('stt step unusable', provider, text.length)
+          return null
         }
-      } else capped++
+        await bump(sql, t, `a:${provider}`)
+        return c.json({ text, lang })
+      } catch (e) {
+        console.warn('stt step failed', provider, String(e))
+        return null
+      }
     }
-    // 2. Workers AI Whisper
+
+    // 1. IndicConformer on the voice container, for Hindi and Punjabi. A cold container gets the
+    //    voice timeout (the app wakes it when Ask opens, so it is usually up).
+    if (INDIC_STT.includes(lang) && base && voiceKey) {
+      const res = await step('indic-stt', capOf(c.env.INDIC_STT_DAILY_CAP, DEFAULT_STT_CAPS.indic), voiceMs, async signal => {
+        const r = await fetcher(`${base}/transcribe?lang=${lang}`, {
+          method: 'POST', signal, headers: { 'x-voice-key': voiceKey, 'content-type': audio.type || 'application/octet-stream' }, body: bytes,
+        })
+        if (!r.ok) throw new Error(`indic stt ${r.status}`)
+        return textOf(await r.json())
+      })
+      if (res) return res
+    }
+    // 2. Groq Whisper
+    if (c.env.GROQ_API_KEY) {
+      const res = await step('groq-stt', capOf(c.env.GROQ_STT_DAILY_CAP, DEFAULT_STT_CAPS.groq), stepMs, async signal => {
+        const body = new FormData()
+        body.set('file', new Blob([bytes], { type: audio.type }), `audio.${ext}`)
+        body.set('model', c.env.GROQ_STT_MODEL || DEFAULT_STT_MODELS.groq)
+        body.set('language', lang)
+        body.set('response_format', 'json')
+        body.set('temperature', '0')
+        const r = await fetcher('https://api.groq.com/openai/v1/audio/transcriptions', {
+          method: 'POST', signal, headers: { authorization: `Bearer ${c.env.GROQ_API_KEY}` }, body,
+        })
+        if (!r.ok) throw new Error(`groq stt ${r.status}`)
+        return textOf(await r.json())
+      })
+      if (res) return res
+    }
+    // 3. Workers AI Whisper
     const ai = aiOf(c)
     if (ai) {
-      if (await takeProvider(sql, t, 'workers-ai-stt', capOf(c.env.WORKERS_AI_STT_DAILY_CAP, DEFAULT_STT_CAPS['workers-ai']))) {
-        tried++
-        try {
-          const out = await withTimeout(stepMs, () => ai.run(c.env.WORKERS_AI_STT_MODEL || DEFAULT_STT_MODELS['workers-ai'], { audio: toBase64(bytes), language: lang, task: 'transcribe' }))
-          const text = textOf(out)
-          if (text !== null) {
-            await bump(sql, t, 'a:workers-ai-stt')
-            return c.json({ text, lang })
-          }
-        } catch (e) {
-          console.warn('stt step failed', 'workers-ai', String(e))
-        }
-      } else capped++
+      const res = await step('workers-ai-stt', capOf(c.env.WORKERS_AI_STT_DAILY_CAP, DEFAULT_STT_CAPS['workers-ai']), stepMs, async () =>
+        textOf(await ai.run(c.env.WORKERS_AI_STT_MODEL || DEFAULT_STT_MODELS['workers-ai'], { audio: toBase64(bytes), language: lang, task: 'transcribe' })))
+      if (res) return res
     }
     if (tried === 0 && capped > 0) return fail(c, 429, 'rate_limited', 'voice_capped', { retryAfter: secondsToNextDay(t) })
+    // Something heard the recording but only as a loop: the app asks the farmer to speak again.
+    if (unclear > 0) return c.json({ text: '', lang })
     return fail(c, 503, 'unavailable', 'transcribe_unavailable')
   })
 

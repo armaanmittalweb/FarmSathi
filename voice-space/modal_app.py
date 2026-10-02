@@ -15,7 +15,7 @@ image = modal.Image.from_registry("ghcr.io/armaanmittalweb/farmsaathi-voice:late
 app = modal.App("farmsaathi-voice")
 
 
-@app.function(image=image, cpu=2.0, memory=4096, max_containers=1, scaledown_window=180, timeout=120,
+@app.function(image=image, cpu=2.0, memory=6144, max_containers=1, scaledown_window=180, timeout=120,
               secrets=[modal.Secret.from_name("farmsaathi-voice")])
 @modal.concurrent(max_inputs=4)
 @modal.asgi_app(label="farmsaathi-voice")

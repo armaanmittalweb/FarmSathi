@@ -55,7 +55,7 @@ Passwords: PBKDF2-SHA256, 100k iterations (Workers CPU allows it once per login)
 
 Model names are vars so they can be changed without a deploy. Only the question, language, history text, matched passages and the profile's crop/state/farm size are sent; never name, phone or email. The system prompt keeps the existing FarmSaathi voice (practical, concise, honest when unsure) and adds: answer in the requested script, never invent scheme amounts or dates that aren't in the passages, suggest the nearest KVK or agri officer for anything risky (pesticide doses, livestock illness).
 
-**Speech to text**: Groq `whisper-large-v3-turbo`, then Workers AI `@cf/openai/whisper-large-v3-turbo`.
+**Speech to text**: for Hindi and Punjabi, AI4Bharat IndicConformer on the voice container first; then Groq `whisper-large-v3-turbo`, then Workers AI `@cf/openai/whisper-large-v3-turbo`. A looping or over-long transcript is dropped; if nothing hears the recording cleanly the answer is `{text: ''}`.
 
 **Limits**: 30 chat messages, 30 transcriptions and 60 speak requests per visitor per day (keyed by IP hash + session), and a global daily cap per provider stored in D1 (`GROQ_DAILY_CAP` etc. vars). Over the limit → 429 `rate_limited` with a localised message and `retryAfter`. A "day" is an India Standard Time day: limits reset at midnight IST and `retryAfter` is the seconds until then (details below).
 

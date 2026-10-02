@@ -25,6 +25,7 @@
     "GEMINI_DAILY_CAP": "200",
     "OPENROUTER_DAILY_CAP": "45",
     "WORKERS_AI_DAILY_CAP": "300",
+    "INDIC_STT_DAILY_CAP": "2000",
     "GROQ_STT_DAILY_CAP": "1800",
     "WORKERS_AI_STT_DAILY_CAP": "300",
     // Lowest cosine similarity (bge-m3) for a passage to go into the prompt.
