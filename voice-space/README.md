@@ -14,12 +14,12 @@ short_description: Read-aloud voice for FarmSaathi in English, Hindi, Punjabi
 The read-aloud voice for [FarmSaathi](https://farmsaathi.amittal.dev): Meta's MMS-TTS (one small
 VITS model per language, `facebook/mms-tts-eng`, `-hin`, `-pan`, the same as the self-hosted
 `ai-service/`) behind a tiny FastAPI app on CPU. Only the FarmSaathi Worker calls it; the app never
-does. When this Space is asleep or busy the Worker answers `503 {fallback: 'device'}` and the
+does. When the voice is asleep or busy the Worker answers `503 {fallback: 'device'}` and the
 phone reads the answer with its own voice.
 
 | Route | |
 |---|---|
-| `GET /health` | `{"ok": true, "voices": ["en", "hi", "pa"]}`. No key. The Worker calls it to wake the Space when the Ask tab opens. It answers only once the models are loaded |
+| `GET /health` | `{"ok": true, "voices": ["en", "hi", "pa"]}`. No key. The Worker calls it to wake the voice when the Ask tab opens. It answers only once the models are loaded |
 | `POST /speak` | `{"text": "...", "lang": "en" \| "hi" \| "pa"}` → `audio/wav` (16 kHz mono PCM). Header `x-voice-key` must equal the `VOICE_KEY` secret, else 401 (and if `VOICE_KEY` is unset, everyone gets 401). Text 1-600 characters, else 400 |
 
 Numbers are spelled out before synthesis (`spoken_numbers.py`), because the MMS vocabularies have
@@ -28,7 +28,7 @@ almost no digits and would skip them: "₹6,000" becomes "छह हज़ार
 
 The models are downloaded into the image at build time (`download_models.py`) and the container
 runs with `HF_HUB_OFFLINE=1`, so waking up costs only the model load (a few seconds), not a
-download. One request is synthesised at a time; a free CPU Space produces speech at roughly real
+download. One request is synthesised at a time; a free CPU container produces speech at roughly real
 time or faster.
 
 ## Run locally
@@ -46,19 +46,20 @@ curl -s -X POST localhost:7860/speak -H 'x-voice-key: local-voice-key' -H 'conte
 
 Or with Docker: `docker build -t farmsaathi-voice . && docker run -p 7860:7860 -e VOICE_KEY=local-voice-key farmsaathi-voice`.
 
-## Create the Space
+## Deploy (Modal)
 
-1. On huggingface.co: New Space → owner `armaanmittalweb`, name `farmsaathi-voice`, SDK **Docker**
-   (blank template), hardware **CPU basic (free)**, visibility **Public** (the Worker calls it
-   without a Hugging Face token; `x-voice-key` is what keeps others out of `/speak`).
-2. Settings → Variables and secrets → New secret `VOICE_KEY` = a long random string. Put the same
-   value into the Worker: `npx wrangler secret put VOICE_KEY`.
-3. Push this folder's contents to the Space repo (`git clone https://huggingface.co/spaces/armaanmittalweb/farmsaathi-voice`,
-   copy the files in, commit, push). The first build downloads torch and the three voices (a few minutes).
-4. Check: `curl https://armaanmittalweb-farmsaathi-voice.hf.space/health`. That URL is the Worker's `VOICE_URL` var.
+Hugging Face Docker Spaces need a paid plan now, so the voice runs on Modal's free Starter plan
+($30 of compute a month, no card, so it cannot bill past that):
 
-A free Space sleeps after 48 hours without traffic; the Worker's wake-up call and the phone's own
-voice cover that.
+1. GitHub Actions (`.github/workflows/voice-image.yml`) builds this folder's Dockerfile on every
+   push to `main` that touches it and publishes `ghcr.io/armaanmittalweb/farmsaathi-voice`.
+2. `modal secret create farmsaathi-voice VOICE_KEY=<the Worker's VOICE_KEY>`
+3. `modal deploy voice-space/modal_app.py`: one container at most, 2 cores and 4 GB, scaled to
+   zero after 3 idle minutes. The URL it prints is the Worker's `VOICE_URL` var.
+4. Check: `curl <that URL>/health`.
+
+When no container is up, the Worker's wake-up call (on opening Ask) starts one, and the phone's
+own voice covers the answers that arrive before it is ready.
 
 ## Licence
 
